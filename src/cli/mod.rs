@@ -34,6 +34,8 @@ pub use util::{ConvertHtmlArgs, UtilCommands};
     after_help = "Examples:\n  flow-cli auth exchange --refresh-token \"$FLOW_REFRESH_TOKEN\" --save\n  flow-cli config set-context --org my-org --project my-project\n  flow-cli orgs list\n  flow-cli projects list --org my-org\n  flow-cli requirements list --paged --limit 50\n  flow-cli raw GET /orgs\n"
 )]
 pub struct Cli {
+    #[arg(long, global = true, default_value = "json", value_enum)]
+    pub output: crate::output::OutputFormat,
     #[command(subcommand)]
     pub command: Commands,
 }
