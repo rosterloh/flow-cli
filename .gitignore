@@ -1,1 +1,5 @@
 /target
+
+# Allow project-local Claude skills to be tracked despite global .gitignore
+!.claude/
+!.claude/**
