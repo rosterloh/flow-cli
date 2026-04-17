@@ -5,6 +5,7 @@ use serde_json::{Value, json};
 
 use crate::config::Config;
 
+#[allow(async_fn_in_trait)]
 pub trait HttpSend: Send + Sync {
     async fn send(
         &self,
