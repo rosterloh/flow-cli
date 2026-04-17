@@ -1,14 +1,10 @@
-mod cli;
-mod client;
-mod config;
-mod handlers;
-
 use anyhow::Result;
 use clap::Parser;
 
-use crate::cli::{Cli, Commands};
-use crate::client::FlowClient;
-use crate::config::{Config, config_path};
+use flow_cli::cli::{Cli, Commands};
+use flow_cli::client::FlowClient;
+use flow_cli::config::{Config, config_path};
+use flow_cli::handlers;
 
 #[tokio::main]
 async fn main() -> Result<()> {
