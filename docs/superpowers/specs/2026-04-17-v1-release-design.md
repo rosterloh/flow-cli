@@ -255,9 +255,8 @@ Matrix: runs on `ubuntu-latest`. Rust toolchain pinned to stable via `dtolnay/ru
 
 ### `release.yml` — runs on push of a `v*` tag (e.g. `v1.0.0`)
 
-1. Builds release binaries for four targets:
+1. Builds release binaries for three targets:
    - `x86_64-unknown-linux-gnu` (runs on `ubuntu-latest`)
-   - `x86_64-apple-darwin` (runs on `macos-latest`)
    - `aarch64-apple-darwin` (runs on `macos-latest`)
    - `x86_64-pc-windows-msvc` (runs on `windows-latest`)
 2. Each target runs in its own matrix job on the appropriate native runner — no cross-compilation needed.
