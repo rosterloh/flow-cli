@@ -33,7 +33,7 @@ pub use test_cases::{
     TestCaseUnlinkJiraArgs, TestCaseUploadFileArgs,
 };
 pub use test_plans::{TestPlanCommands, TestPlanItemArgs, TestPlanItemPayloadArgs};
-pub use values::{ListValuesArgs, SetNumberValueArgs, ValueCommands};
+pub use values::{ListValuesArgs, SetNumberValueArgs, ValueCommands, ValueItemArgs};
 pub use util::{ConvertHtmlArgs, UtilCommands};
 
 #[derive(Parser, Debug)]
