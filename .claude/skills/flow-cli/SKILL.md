@@ -9,88 +9,106 @@ The `flow` binary wraps the Flow Engineering REST API. Use it to query and manag
 
 ## Finding the binary
 
-Always resolve the binary before running commands. Prefer the system-installed version; fall back to the one bundled with this skill:
-
 ```bash
-FLOW=$(command -v flow 2>/dev/null || echo "$(dirname "$0")/../assets/flow")
-# Or as a one-liner to use in any command:
 FLOW=$(command -v flow 2>/dev/null || echo "/home/rio/.claude/skills/flow-cli/assets/flow")
-```
-
-Confirm the binary works:
-```bash
 $FLOW --version
 $FLOW auth status
 ```
 
-If auth status shows `"auth": "none"`, tell the user to run `$FLOW auth set-bearer --access-token "$FLOW_ACCESS_TOKEN" --save` or `$FLOW auth exchange --refresh-token "$FLOW_REFRESH_TOKEN" --save`.
+If auth status shows `"auth": "none"`, tell the user to run:
+```bash
+$FLOW auth set-bearer --access-token "$FLOW_ACCESS_TOKEN" --save
+# or
+$FLOW auth exchange --refresh-token "$FLOW_REFRESH_TOKEN" --save
+```
 
 ## Context defaults
 
-Most commands need an org and project. They read from config (`$FLOW config show`) or accept `--org` / `--project` flags. If the user's context is already configured (visible in `auth status`), reuse it — don't ask them to repeat it.
-
-If the org/project is not set, check the environment:
+Most commands need an org and project. Read the current config once at the start:
 ```bash
 $FLOW config show
 ```
+If org/project are already set, reuse them — don't ask the user to repeat them.
 
-## Key commands
+## Searching requirements
 
-### Search / filter requirements
+The native `search` command fetches all requirements and filters by name (case-insensitive). It returns a compact `[{id, name, owner}]` array — pipe to table output for readability:
+
 ```bash
-# Returns all requirements (can be large — pipe to filter)
-$FLOW requirements filter --json '{}'
-
-# Paginated list
-$FLOW requirements list --paged --limit 50
-
-# Then filter with Python for keyword matches:
-$FLOW requirements filter --json '{}' | python3 -c "
-import json, sys, re
-data = json.load(sys.stdin)
-term = 'YOUR TERM'
-hits = [r for r in data if re.search(term, r.get('name',''), re.IGNORECASE)]
-for r in sorted(hits, key=lambda x: x['id']):
-    print(f\"[{r['id']:>4}] {r['name']}  (owner: {r.get('owner') or 'unowned'})\")
-print(f'{len(hits)} of {len(data)} requirements matched')
-"
+$FLOW requirements search "OTA"
+$FLOW --output table requirements search "battery"
+$FLOW requirements search "charging" | python3 -c "import json,sys; [print(r['id'], r['name']) for r in json.load(sys.stdin)]"
 ```
 
-The filter endpoint returns all requirements by default — always pipe large responses through Python or `jq` rather than printing them raw.
-
-### Get a single requirement
+For multi-word or regex patterns, use the filter endpoint and pipe to Python:
 ```bash
-$FLOW requirements get --id 1234
+$FLOW requirements filter --json '{}' > /tmp/flow-reqs.json
+python3 << 'EOF'
+import json, re
+reqs = json.load(open('/tmp/flow-reqs.json'))
+hits = [r for r in reqs if re.search(r'\b(OTA|over.the.air)\b', r.get('name',''), re.IGNORECASE)]
+for r in hits:
+    print(r['id'], r['name'])
+EOF
 ```
 
-### List requirements by scope
+Save to `/tmp/flow-reqs.json` when running multiple searches — the full fetch is 3–4 MB and reusing it saves time.
+
+## Systems
+
 ```bash
-$FLOW requirements list --scope org            # organisation-level
-$FLOW requirements list --scope without-system # unassigned
+# Top-level systems only (clean hierarchy view)
+$FLOW --output table systems list --top-level
+
+# All systems (paginated JSON)
+$FLOW systems list --paged --limit 50
+
+# Single system by UUID
+$FLOW systems get --id <uuid>
 ```
 
-### Systems
+Note: `systems list` returns `{"results": [...], "hasMore": ..., "cursor": ...}` — not a flat array. Use `--top-level` for a filtered flat list, or extract `results` manually when scripting.
+
+## Getting full requirement detail
+
 ```bash
-$FLOW systems list --output table      # quick overview
-$FLOW systems list --paged --limit 50  # paginated JSON
-$FLOW systems get --id <uuid>          # single system (id is a UUID string)
+$FLOW requirements get --id 1234 > /tmp/req.json
+python3 << 'EOF'
+import json, re
+r = json.load(open('/tmp/req.json'))
+print(f"Name:  {r['name']}")
+print(f"Owner: {r.get('owner') or 'unowned'}")
+# Extract plain text from Flow rich-text JSON
+texts = re.findall(r'"text":"(.*?)"(?=[,}])', r.get('statement_raw',''))
+statement = ' '.join(t.replace('\\n', ' ').strip() for t in texts if t.strip())
+print(f"\nStatement:\n  {statement}")
+print(f"\nSystems: {len(r.get('systemIds', []))}")
+EOF
+```
+
+## Other common commands
+
+### List by scope
+```bash
+$FLOW requirements list --scope org            # organisation-level requirements
+$FLOW requirements list --scope without-system # requirements not linked to any system
 ```
 
 ### Test cases and test plans
 ```bash
-$FLOW test-cases list --paged --limit 50
+$FLOW --output table test-cases list --paged --limit 20
 $FLOW test-cases get --id 4321
 $FLOW test-plans list
 $FLOW test-plans get --id 12
 ```
 
-### Table output for readability
+### Create and link
 ```bash
-$FLOW --output table requirements list --paged --limit 20
-$FLOW --output table systems list
+$FLOW requirements create --name "New requirement"
+$FLOW requirements link-test-case --json '{"requirementId": 1234, "testCaseId": 4321}'
 ```
 
-### Raw API access (for endpoints not yet in the CLI)
+### Raw API access
 ```bash
 $FLOW raw GET /org/my-org/project/my-project/someEndpoint
 $FLOW raw POST /org/my-org/project/my-project/requirements --json '{"name":"New req"}'
@@ -98,58 +116,14 @@ $FLOW raw POST /org/my-org/project/my-project/requirements --json '{"name":"New 
 
 ## Handling large responses
 
-The Flow API returns full requirement objects (custom fields, links, reviewers, etc.). A project with ~2000 requirements produces 3–4 MB of JSON. Always:
-1. Pipe through Python for filtering
-2. Use `--paged --limit N` when exploring
-3. Only fetch individual items (`get --id`) when you need full detail
-
-## Common workflows
-
-### Find requirements about a topic
-1. Run `$FLOW requirements filter --json '{}'` and pipe to Python with `re.search(r'\bTERM\b', name, re.IGNORECASE)` for whole-word matching.
-2. Show the user a clean table: id, name, owner.
-3. Offer to `get --id` for full detail on any specific result.
-
-### Link a test case to a requirement
-```bash
-$FLOW requirements link-test-case --json '{"requirementId": 1234, "testCaseId": 4321}'
-```
-
-### Create a requirement
-```bash
-$FLOW requirements create --name "My new requirement"
-# Or with multiple names:
-$FLOW requirements create --name "REQ-A" --name "REQ-B"
-```
-
-### Check OTA / topic requirements and get full statements
-```bash
-# 1. Find matching requirements
-$FLOW requirements filter --json '{}' | python3 -c "
-import json, sys, re
-for r in json.load(sys.stdin):
-    if re.search(r'\bOTA\b', r.get('name',''), re.IGNORECASE):
-        print(r['id'], r['name'])
-"
-
-# 2. Get full statement for a specific one
-$FLOW requirements get --id 1711 | python3 -c "
-import json, sys
-r = json.load(sys.stdin)
-print('Name:', r['name'])
-print('Owner:', r.get('owner'))
-# statement_raw is Flow rich text JSON — extract plain text:
-import re
-raw = r.get('statement_raw','')
-text = re.sub(r'{\"text\":\"(.*?)\"', lambda m: m.group(1), raw)
-print('Statement:', text[:500])
-"
-```
+The full requirements set is 3–4 MB (~2000 items). Always:
+1. Use `requirements search <term>` for name-based lookups
+2. Save the full dataset to `/tmp/flow-reqs.json` if running multiple queries
+3. Use `--paged --limit N` when exploring other resources
 
 ## Tips
 
-- **IDs**: requirements use integer IDs; systems use UUID strings.
-- **Stages and custom fields**: returned as UUIDs/raw JSON — use `get --id` to fetch the full object and inspect `stage`, `customFields`.
-- **Mutations are permanent**: confirm with the user before running `create`, `patch`, `delete`, or any linking command.
-- **`--output table`** is good for quick overviews; JSON is better for scripting.
-- The `raw` command covers any endpoint not yet wrapped — check `$FLOW --help` for the full list.
+- **IDs**: requirements use integer IDs; systems use UUID strings
+- **`--output table`** is good for quick overviews; JSON is better for scripting
+- **Mutations are permanent** — confirm with the user before running `create`, `patch`, `delete`, or any linking command
+- The `raw` command covers any endpoint not yet wrapped — check `$FLOW --help` for the full list
