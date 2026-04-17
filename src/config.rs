@@ -31,8 +31,8 @@ impl Config {
 
         let contents = fs::read_to_string(path)
             .with_context(|| format!("failed to read config from {}", path.display()))?;
-        Ok(serde_json::from_str(&contents)
-            .with_context(|| format!("failed to parse config {}", path.display()))?)
+        serde_json::from_str(&contents)
+            .with_context(|| format!("failed to parse config {}", path.display()))
     }
 
     pub fn save(&self, path: &Path) -> Result<()> {
