@@ -76,11 +76,10 @@ fn print_array_table(items: &[Value]) {
 }
 
 fn print_object_table(value: &Value) {
-    if let Value::Object(map) = value {
-        let key_width = map.keys().map(|k| k.len()).max().unwrap_or(0);
-        for (k, v) in map {
-            println!("{:<width$}  {}", k, value_to_cell(v), width = key_width);
-        }
+    let Value::Object(map) = value else { return };
+    let key_width = map.keys().map(|k| k.len()).max().unwrap_or(0);
+    for (k, v) in map {
+        println!("{:<width$}  {}", k, value_to_cell(v), width = key_width);
     }
 }
 

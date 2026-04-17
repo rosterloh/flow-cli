@@ -1,4 +1,4 @@
-// tests/unit/output.rs
+// tests/output.rs
 use serde_json::json;
 
 use flow_cli::output::{OutputFormat, print_output};
