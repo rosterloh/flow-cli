@@ -3,6 +3,8 @@
 mod documents;
 #[path = "integration/interfaces.rs"]
 mod interfaces;
+#[path = "integration/members.rs"]
+mod members;
 #[path = "integration/requirements.rs"]
 mod requirements;
 #[path = "integration/systems.rs"]
