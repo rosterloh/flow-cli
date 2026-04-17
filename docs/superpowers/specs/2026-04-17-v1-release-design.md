@@ -239,6 +239,34 @@ FLOW_ACCESS_TOKEN=xxx FLOW_ORG=xxx FLOW_PROJECT=xxx cargo test   # all tests
 
 ---
 
+## CI/CD (GitHub Actions)
+
+Two workflows live in `.github/workflows/`.
+
+### `ci.yml` — runs on every push and pull request to `main`
+
+1. **Check** — `cargo check` to catch compile errors fast
+2. **Lint** — `cargo clippy -- -D warnings` (fail on any warning)
+3. **Format** — `cargo fmt --check`
+4. **Unit tests** — `cargo test` (no credentials, always runs)
+5. **Integration tests** — `cargo test` with `FLOW_ACCESS_TOKEN`, `FLOW_ORG`, and `FLOW_PROJECT` injected from GitHub repository secrets. Runs only on push to `main` (not on PRs from forks, which can't access secrets). If secrets are absent the test suite skips gracefully.
+
+Matrix: runs on `ubuntu-latest`. Rust toolchain pinned to stable via `dtolnay/rust-toolchain@stable`.
+
+### `release.yml` — runs on push of a `v*` tag (e.g. `v1.0.0`)
+
+1. Builds release binaries for three targets:
+   - `x86_64-unknown-linux-gnu`
+   - `x86_64-apple-darwin`
+   - `aarch64-apple-darwin`
+2. Uses `cross` for cross-compilation where the runner can't build natively.
+3. Strips and archives each binary as `flow-{target}.tar.gz`.
+4. Creates a GitHub Release via `softprops/action-gh-release` and uploads all three archives as release assets.
+
+The release workflow requires a `GITHUB_TOKEN` (automatically provided by Actions) — no additional secrets needed for publishing.
+
+---
+
 ## Versioning & Binary Name
 
 - `Cargo.toml` version: `0.1.0` → `1.0.0`
@@ -254,4 +282,5 @@ Work through resources in this sequence, completing all four concerns (module sp
 1. Shared infrastructure: `output.rs`, `HttpSend` trait, test harness setup
 2. Existing resources (refactor + fill gaps): auth, config, orgs, projects, requirements, systems, test-cases, test-plans, values, util
 3. New resources: documents, interfaces, members, configurations, test-cycles, test-runs
-4. `Cargo.toml`: version bump + binary rename
+4. CI/CD: `ci.yml` and `release.yml` GitHub Actions workflows
+5. `Cargo.toml`: version bump + binary rename
