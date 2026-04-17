@@ -7,6 +7,7 @@ use reqwest::Method;
 pub mod auth;
 pub mod config;
 pub mod documents;
+pub mod interfaces;
 pub mod orgs;
 pub mod projects;
 pub mod requirements;
@@ -19,6 +20,7 @@ pub mod util;
 pub use auth::{AuthCommands, ExchangeAuthArgs, SetBasicArgs, SetBearerArgs};
 pub use config::ConfigCommands;
 pub use documents::{DocumentCommands, DocumentItemArgs};
+pub use interfaces::{InterfaceCommands, InterfaceItemArgs};
 pub use orgs::OrgsCommands;
 pub use projects::{CreateProjectArgs, ProjectCommands};
 pub use requirements::{
@@ -89,6 +91,10 @@ pub enum Commands {
     Documents {
         #[command(subcommand)]
         command: DocumentCommands,
+    },
+    Interfaces {
+        #[command(subcommand)]
+        command: InterfaceCommands,
     },
     Values {
         #[command(subcommand)]

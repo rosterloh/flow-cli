@@ -2,6 +2,8 @@
 pub mod helpers;
 #[path = "unit/documents.rs"]
 mod documents;
+#[path = "unit/interfaces.rs"]
+mod interfaces;
 #[path = "unit/orgs.rs"]
 mod orgs;
 mod output;
