@@ -28,7 +28,10 @@ pub use systems::{
     CreateSystemArgs, SystemCommands, SystemItemArgs, SystemLinkPayloadArgs,
     SystemUnlinkRequirementArgs, SystemUnlinkTestCaseArgs, UpdateSystemArgs,
 };
-pub use test_cases::{TestCaseCommands, TestCaseItemArgs};
+pub use test_cases::{
+    TestCaseCommands, TestCaseItemArgs, TestCaseItemPayloadArgs,
+    TestCaseUnlinkJiraArgs, TestCaseUploadFileArgs,
+};
 pub use test_plans::TestPlanCommands;
 pub use values::{ListValuesArgs, SetNumberValueArgs, ValueCommands};
 pub use util::{ConvertHtmlArgs, UtilCommands};

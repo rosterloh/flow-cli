@@ -7,3 +7,5 @@ mod output;
 mod requirements;
 #[path = "unit/systems.rs"]
 mod systems;
+#[path = "unit/test_cases.rs"]
+mod test_cases;

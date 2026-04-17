@@ -3,6 +3,8 @@
 mod requirements;
 #[path = "integration/systems.rs"]
 mod systems;
+#[path = "integration/test_cases.rs"]
+mod test_cases;
 
 /// Returns `(token, org, project)` from env vars, or `None` if any are absent.
 /// In local dev: call this at the top of every test and `return` early if None.
