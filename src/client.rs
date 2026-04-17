@@ -1,8 +1,20 @@
+// src/client.rs
 use anyhow::{Context, Result, bail};
 use reqwest::{Client, Method, StatusCode};
 use serde_json::{Value, json};
 
 use crate::config::Config;
+
+pub trait HttpSend: Send + Sync {
+    async fn send(
+        &self,
+        method: Method,
+        path: &str,
+        query: &[(String, String)],
+        body: Option<Value>,
+        with_auth: bool,
+    ) -> Result<Value>;
+}
 
 #[derive(Clone)]
 pub struct FlowClient {
@@ -35,7 +47,7 @@ impl FlowClient {
             Auth::Basic { username, password }
         } else {
             bail!(
-                "no auth configured; use `flow-cli auth exchange`, `flow-cli auth set-bearer`, or `flow-cli auth set-basic`"
+                "no auth configured; use `flow auth exchange`, `flow auth set-bearer`, or `flow auth set-basic`"
             );
         };
 
@@ -53,8 +65,10 @@ impl FlowClient {
             auth: Auth::Bearer(String::new()),
         })
     }
+}
 
-    pub async fn send(
+impl HttpSend for FlowClient {
+    async fn send(
         &self,
         method: Method,
         path: &str,

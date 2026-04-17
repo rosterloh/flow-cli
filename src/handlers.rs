@@ -9,7 +9,7 @@ use crate::cli::{
     ProjectCommands, RawCommand, RequirementCommands, ResourceContextArgs, SystemCommands,
     TestCaseCommands, TestPlanCommands, UtilCommands, ValueCommands,
 };
-use crate::client::FlowClient;
+use crate::client::{FlowClient, HttpSend};
 use crate::config::Config;
 
 pub async fn handle_auth(
