@@ -1,31 +1,25 @@
-# flow-cli
+# flow
 
-`flow-cli` is a Rust command-line client for the Flow Engineering REST API.
+`flow` is a Rust command-line client for the Flow Engineering REST API.
 
-It wraps a practical subset of the API with first-class commands for:
+It provides first-class commands for every resource in the API:
 
 - authentication and local config
-- organisations and projects
-- requirements
-- systems
-- test cases and test plans
+- organisations, projects, members, and configurations
+- requirements, systems, documents, and interfaces
+- test cases, test plans, test cycles, and test runs
 - design values
 - HTML-to-FlowText conversion
 - arbitrary API calls through a raw request command
+
+Output defaults to formatted JSON. Pass `--output table` for a human-readable table view.
 
 The CLI targets the Flow REST API documented at `https://api.flowengineering.com/rest/v1/docs`.
 
 ## Requirements
 
 - Rust toolchain with Cargo
-- A Flow API credential
-
-The CLI supports two auth modes documented by the API:
-
-- bearer token auth
-- basic auth
-
-It also supports exchanging a Flow refresh token for a bearer access token using `/auth/exchange`.
+- A Flow API credential (bearer token or basic auth)
 
 ## Build
 
@@ -39,6 +33,12 @@ Run directly during development:
 cargo run -- --help
 ```
 
+Or install the `flow` binary to your Cargo bin directory:
+
+```bash
+cargo install --path .
+```
+
 ## Configuration
 
 The CLI stores local configuration at:
@@ -47,289 +47,235 @@ The CLI stores local configuration at:
 ~/.config/flow-cli/config.json
 ```
 
-Config can include:
+Config fields:
 
-- `base_url`
-- `org_alias`
-- `project_alias`
-- `access_token`
-- `refresh_token`
-- `username`
-- `password`
+| Field | Env override |
+|---|---|
+| `base_url` | `FLOW_BASE_URL` |
+| `org_alias` | `FLOW_ORG` |
+| `project_alias` | `FLOW_PROJECT` |
+| `access_token` | `FLOW_ACCESS_TOKEN` |
+| `refresh_token` | `FLOW_REFRESH_TOKEN` |
+| `username` | `FLOW_USERNAME` |
+| `password` | `FLOW_PASSWORD` |
 
-Environment variables override saved values where applicable:
-
-- `FLOW_BASE_URL`
-- `FLOW_ORG`
-- `FLOW_PROJECT`
-- `FLOW_REFRESH_TOKEN`
-- `FLOW_ACCESS_TOKEN`
-- `FLOW_USERNAME`
-- `FLOW_PASSWORD`
-
-Show the active config:
+Show active config:
 
 ```bash
-cargo run -- config show
+flow config show
 ```
 
-Print the config path:
+Set default org and project:
 
 ```bash
-cargo run -- config path
-```
-
-Set default org and project context:
-
-```bash
-cargo run -- config set-context --org my-org --project my-project
+flow config set-context --org my-org --project my-project
 ```
 
 ## Authentication
 
-### Exchange a refresh token
-
-If you have a Flow refresh token, exchange it for an access token and save it:
+Exchange a refresh token for an access token and save it:
 
 ```bash
-cargo run -- auth exchange --refresh-token "$FLOW_REFRESH_TOKEN" --save
+flow auth exchange --refresh-token "$FLOW_REFRESH_TOKEN" --save
 ```
 
-To save the refresh token in config as well:
+Also save the refresh token:
 
 ```bash
-cargo run -- auth exchange --refresh-token "$FLOW_REFRESH_TOKEN" --save --save-refresh-token
+flow auth exchange --refresh-token "$FLOW_REFRESH_TOKEN" --save --save-refresh-token
 ```
 
-### Save a bearer token directly
+Save a bearer token directly:
 
 ```bash
-cargo run -- auth set-bearer --access-token "$FLOW_ACCESS_TOKEN" --save
+flow auth set-bearer --access-token "$FLOW_ACCESS_TOKEN" --save
 ```
 
-### Save basic auth credentials
+Save basic auth credentials:
 
 ```bash
-cargo run -- auth set-basic --username "$FLOW_USERNAME" --password "$FLOW_PASSWORD" --save
+flow auth set-basic --username "$FLOW_USERNAME" --password "$FLOW_PASSWORD" --save
 ```
 
-### Inspect or clear auth
+Inspect or clear auth:
 
 ```bash
-cargo run -- auth status
-cargo run -- auth clear
-cargo run -- auth clear --all
+flow auth status
+flow auth clear
+flow auth clear --all   # also clears the saved refresh token
+```
+
+## Output format
+
+All commands output formatted JSON by default. Pass `--output table` before the subcommand for a human-readable table:
+
+```bash
+flow --output table requirements list --paged --limit 20
+flow --output table systems list
 ```
 
 ## Commands
 
-Top-level commands:
+| Command | Description |
+|---|---|
+| `auth` | Authentication management |
+| `config` | Local config management |
+| `orgs` | List organisations |
+| `projects` | List and create projects |
+| `members` | Org and project member management |
+| `configurations` | Project configurations |
+| `requirements` | Requirements CRUD and linking |
+| `systems` | Systems CRUD and linking |
+| `documents` | Documents CRUD |
+| `interfaces` | Interfaces CRUD |
+| `test-cases` | Test case CRUD and linking |
+| `test-plans` | Test plan CRUD and linking |
+| `test-cycles` | Test cycle management |
+| `test-runs` | Test run management |
+| `values` | Design value management |
+| `util` | Utility commands (HTML conversion) |
+| `raw` | Arbitrary API requests |
 
-- `auth`
-- `config`
-- `orgs`
-- `projects`
-- `requirements`
-- `systems`
-- `test-cases`
-- `test-plans`
-- `values`
-- `util`
-- `raw`
-
-Use built-in help for any command:
+Built-in help for any command:
 
 ```bash
-cargo run -- <command> --help
-```
-
-Examples:
-
-```bash
-cargo run -- orgs list
-cargo run -- projects list --org my-org
-cargo run -- projects create --org my-org --name "Platform"
+flow <command> --help
+flow <command> <subcommand> --help
 ```
 
 ## Requirements
 
-List requirements:
-
 ```bash
-cargo run -- requirements list
-```
+flow requirements list
+flow requirements list --paged --limit 50
+flow requirements list --scope org          # organisation-level requirements
+flow requirements list --scope without-system
 
-Use the paginated endpoint:
+flow requirements get --id 1234
+flow requirements create --name "REQ-1" --name "REQ-2"
+flow requirements patch --json '[{"id":1234,"name":"Updated"}]'
+flow requirements delete --id 1234
 
-```bash
-cargo run -- requirements list --paged --limit 50
-```
+flow requirements filter --json '{"status":"open"}'
+flow requirements set-stage --json '[{"id":1234,"stage":"verified"}]'
+flow requirements set-value --json '[{"id":1234,"valueId":5,"value":42}]'
+flow requirements set-import-id --json '[{"id":1234,"importId":"EXT-001"}]'
 
-Fetch a single requirement:
+flow requirements list-test-cases --id 1234
+flow requirements list-test-plans --id 1234
 
-```bash
-cargo run -- requirements get --id 1234
-```
+flow requirements link-jira --id 1234 --json '{"jiraIssueId":"PROJ-42"}'
+flow requirements unlink-jira --id 1234 --jira-issue-id "PROJ-42"
 
-Create requirements:
-
-```bash
-cargo run -- requirements create --name "REQ-1" --name "REQ-2" --description "Imported from CLI"
-```
-
-Patch requirements from inline JSON:
-
-```bash
-cargo run -- requirements patch --json '[{"id":1234,"name":"Updated name"}]'
-```
-
-Patch requirements from a file:
-
-```bash
-cargo run -- requirements patch --body-file patches/requirements.json
-```
-
-Delete a requirement:
-
-```bash
-cargo run -- requirements delete --id 1234
+flow requirements get-custom-fields
+flow requirements patch-custom-fields --json '[...]'
 ```
 
 ## Systems
 
-List systems:
-
 ```bash
-cargo run -- systems list
+flow systems list
+flow systems create --name "Vehicle" --prefix VEH
+flow systems update --id <uuid> --name "Vehicle Core"
+flow systems delete --id <uuid>
+flow systems bulk-update --json '[...]'
+
+flow systems list-requirements --id <uuid>
+flow systems link-requirement --id <uuid> --json '{"requirementId":1234}'
+flow systems unlink-requirement --id <uuid> --requirement-id 1234
+
+flow systems list-test-cases --id <uuid>
+flow systems link-test-case --id <uuid> --json '{"testCaseId":4321}'
+flow systems unlink-test-case --id <uuid> --test-case-id 4321
 ```
 
-Create a system:
+## Documents and Interfaces
 
 ```bash
-cargo run -- systems create --name "Vehicle" --prefix VEH
+flow documents list
+flow documents get --id 7
+flow documents create --json '{"name":"ICD"}'
+flow documents delete --id 7
+
+flow interfaces list
+flow interfaces create --json '{"name":"CAN Bus"}'
+flow interfaces delete --id 5
 ```
 
-Update a system:
+## Members
 
 ```bash
-cargo run -- systems update --id 550e8400-e29b-41d4-a716-446655440000 --name "Vehicle Core"
-```
+flow members list-org --org my-org
+flow members add-org --org my-org --json '{"email":"user@example.com","role":"member"}'
+flow members remove-org --org my-org --email user@example.com
 
-Or provide a full JSON body:
-
-```bash
-cargo run -- systems update --id 550e8400-e29b-41d4-a716-446655440000 --json '{"name":"Vehicle Core"}'
-```
-
-Delete a system:
-
-```bash
-cargo run -- systems delete --id 550e8400-e29b-41d4-a716-446655440000
+flow members list-project
+flow members add-project --json '{"email":"user@example.com","role":"viewer"}'
+flow members remove-project --email user@example.com
 ```
 
 ## Test Cases and Test Plans
 
-List test cases:
-
 ```bash
-cargo run -- test-cases list
+flow test-cases list --paged --limit 50
+flow test-cases get --id 4321
+flow test-cases create --name "Brake pedal test"
+flow test-cases patch --json '[{"id":4321,"name":"Updated"}]'
+flow test-cases delete --id 4321
+
+flow test-cases set-steps --id 4321 --json '[{"action":"Press brake","expected":"Car stops"}]'
+flow test-cases create-test-run --id 4321 --json '{}'
+flow test-cases list-requirements --id 4321
+
+flow test-plans list
+flow test-plans create --json '{"name":"Sprint 1 plan"}'
+flow test-plans get --id 12
+flow test-plans delete --id 12
+flow test-plans create-cycle --id 12 --json '{"name":"Cycle 1"}'
+flow test-plans link-test-case --json '{"testPlanId":12,"testCaseId":4321}'
 ```
 
-Get a test case:
+## Test Cycles and Test Runs
 
 ```bash
-cargo run -- test-cases get --id 4321
-```
+flow test-cycles get --id 99
+flow test-cycles delete --id 99
 
-Create test cases:
-
-```bash
-cargo run -- test-cases create --name "Brake pedal test" --description "CLI-created test"
-```
-
-Patch test cases:
-
-```bash
-cargo run -- test-cases patch --json '[{"id":4321,"name":"Updated test case"}]'
-```
-
-Delete a test case:
-
-```bash
-cargo run -- test-cases delete --id 4321
-```
-
-List test plans:
-
-```bash
-cargo run -- test-plans list
-```
-
-Patch test plans:
-
-```bash
-cargo run -- test-plans patch --json '[{"id":12,"name":"Updated plan"}]'
+flow test-runs get --cycle-id 99 --id 1
+flow test-runs patch --cycle-id 99 --id 1 --json '{"status":"passed"}'
+flow test-runs delete --cycle-id 99 --id 1
+flow test-runs set-steps --cycle-id 99 --id 1 --json '[{"result":"pass"}]'
 ```
 
 ## Values
 
-List all values:
-
 ```bash
-cargo run -- values list
-```
-
-List numeric values only:
-
-```bash
-cargo run -- values list --numeric
-```
-
-Update a numeric value:
-
-```bash
-cargo run -- values set-number --id 77 --value 42.5
+flow values list
+flow values list --numeric
+flow values get --id 77
+flow values set-number --id 77 --value 42.5
+flow values set-import-id --json '[{"id":77,"importId":"VAL-001"}]'
 ```
 
 ## Utilities
 
-Convert HTML to FlowText:
-
 ```bash
-cargo run -- util convert-html --html '<h1>Hello</h1>' --html '<p>World</p>'
+flow util convert-html --html '<h1>Hello</h1>' --html '<p>World</p>'
 ```
 
 ## Raw Requests
 
-Use `raw` to call any endpoint that is not wrapped yet.
-
-Simple GET:
+Call any endpoint directly:
 
 ```bash
-cargo run -- raw GET /orgs
-```
-
-GET with query parameters:
-
-```bash
-cargo run -- raw GET /org/my-org/project/my-project/requirements/paged --query limit=25 --query after=cursor123
-```
-
-POST with JSON body:
-
-```bash
-cargo run -- raw POST /org/my-org/projects --json '{"name":"New Project"}'
-```
-
-POST with JSON from file:
-
-```bash
-cargo run -- raw POST /org/my-org/project/my-project/requirements --body-file payload.json
+flow raw GET /orgs
+flow raw GET /org/my-org/project/my-project/requirements/paged --query limit=25 --query after=cursor123
+flow raw POST /org/my-org/projects --json '{"name":"New Project"}'
+flow raw POST /org/my-org/project/my-project/requirements --body-file payload.json
 ```
 
 ## Notes
 
-- Most resource commands require an org and project. Pass `--org` and `--project`, or set them once with `config set-context`.
-- The CLI prints API responses as formatted JSON.
-- Some Flow endpoints documented in the API are not wrapped as dedicated commands yet. Use `raw` for those.
-- Live API behavior still depends on your credentials and Flow permissions.
+- Most resource commands require an org and project. Pass `--org`/`--project` flags or set defaults with `flow config set-context`.
+- JSON responses are pretty-printed by default; use `--output table` for a columnar view.
+- All commands respect `FLOW_ORG` and `FLOW_PROJECT` environment variables.

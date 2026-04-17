@@ -1,63 +1,113 @@
 # Repository Guidelines
 
-## Project Structure & Module Organization
+## Project Structure
 
-This repository is a small Rust CLI crate.
+This is a Rust CLI crate that exposes the Flow Engineering REST API as the `flow` binary.
 
-- `src/main.rs`: the entire application entrypoint, CLI definitions, config handling, and HTTP client logic.
-- `Cargo.toml`: crate metadata and dependencies.
-- `Cargo.lock`: locked dependency graph for reproducible builds.
-- `README.md`: user-facing setup and usage documentation.
-
-There are no separate test or asset directories yet. If the code grows, prefer extracting reusable logic from `src/main.rs` into focused modules under `src/` such as `auth.rs`, `client.rs`, or `commands/`.
+```
+src/
+  main.rs              entry point — parses CLI, routes to handlers
+  lib.rs               library target exposing all modules (required for integration tests)
+  output.rs            OutputFormat enum (Json/Table) and print_output()
+  client.rs            FlowClient, HttpSend trait, Auth enum
+  config.rs            Config struct, config file loading/saving
+  cli/
+    mod.rs             Cli struct, Commands enum, shared arg structs
+    auth.rs            AuthCommands
+    config.rs          ConfigCommands
+    configurations.rs  ConfigurationCommands
+    documents.rs       DocumentCommands
+    interfaces.rs      InterfaceCommands
+    members.rs         MemberCommands
+    orgs.rs            OrgsCommands
+    projects.rs        ProjectCommands
+    requirements.rs    RequirementCommands (and all requirement-specific arg structs)
+    systems.rs         SystemCommands
+    test_cases.rs      TestCaseCommands
+    test_cycles.rs     TestCycleCommands
+    test_plans.rs      TestPlanCommands
+    test_runs.rs       TestRunCommands
+    values.rs          ValueCommands
+    util.rs            UtilCommands
+  handlers/
+    mod.rs             shared helpers (resolve_context, list_query, patch_collection, etc.)
+                       and pub use re-exports of all handle_* functions
+    auth.rs … util.rs  one file per resource, matching src/cli/ layout
+tests/
+  unit.rs              unit test binary entry point (cargo test --test unit)
+  unit/
+    helpers.rs         MockHttpClient implementing HttpSend
+    output.rs          output formatting tests
+    orgs.rs … …        handler unit tests per resource
+  integration.rs       integration test binary entry point (cargo test --test integration)
+  integration/
+    requirements.rs … integration smoke tests per resource (skip without credentials)
+docs/
+  superpowers/
+    specs/             design specs
+    plans/             implementation plans
+.github/
+  workflows/
+    ci.yml             lint + unit tests on every push/PR; integration tests on main with credentials
+    release.yml        builds Linux/macOS/Windows binaries on v* tags, publishes GitHub Release
+```
 
 ## Build, Test, and Development Commands
 
-- `cargo build`: compile the project.
-- `cargo check`: fast compile validation without producing a release binary.
-- `cargo fmt --all`: format the Rust codebase.
-- `cargo test`: run automated tests.
-- `cargo run -- --help`: inspect the CLI surface locally.
-- `cargo run -- auth status`: verify config loading without making an authenticated API call.
+```bash
+cargo build                    # compile dev binary to target/debug/flow
+cargo check                    # fast compile validation
+cargo fmt --all                # format all Rust code
+cargo clippy -- -D warnings    # lint (fails on any warning)
+cargo test --test unit         # unit tests only (no credentials needed)
+cargo test --test integration  # integration tests (requires FLOW_ACCESS_TOKEN, FLOW_ORG, FLOW_PROJECT)
+cargo test                     # all tests
+cargo run -- --help            # inspect the CLI surface locally
+cargo run -- auth status       # verify config loading without an API call
+```
 
-Run these before opening a PR:
+Run before opening a PR:
 
 ```bash
-cargo fmt --all
-cargo check
-cargo test
+cargo fmt --all && cargo clippy -- -D warnings && cargo test --test unit
 ```
 
 ## Coding Style & Naming Conventions
 
-Use standard Rust style with 4-space indentation and rely on `cargo fmt` for formatting. Follow Rust naming conventions:
+Standard Rust style, formatted with `cargo fmt`. Follow Rust naming conventions:
 
-- `snake_case` for functions, variables, and modules
+- `snake_case` for functions, variables, modules
 - `PascalCase` for structs and enums
 - `SCREAMING_SNAKE_CASE` for constants
 
-Keep command handlers small and prefer shared helper functions for request building, config lookup, and JSON parsing.
+**Handler pattern:** each `handle_X` function is `pub async fn handle_X<C: HttpSend>(command: XCommands, client: &C, config: &Config, output: OutputFormat) -> Result<()>`. Shared helpers (`resolve_context`, `list_query`, `load_json_payload`, etc.) live in `handlers/mod.rs` as `pub(crate)` functions.
+
+**CLI pattern:** each resource's command enum and its arg structs live in `src/cli/{resource}.rs`. Shared arg structs (`ResourceContextArgs`, `ListArgs`, `PatchCollectionArgs`, `JsonPayloadArgs`, etc.) live in `src/cli/mod.rs`.
 
 ## Testing Guidelines
 
-This repository does not yet have dedicated tests, but new logic should add them where practical. Prefer unit tests near the code under `src/` and integration tests under `tests/` when command behavior becomes more complex.
+**Unit tests** (`tests/unit/`) use `MockHttpClient` from `tests/unit/helpers.rs`. Tests assert on the HTTP method and path the handler constructs. Add a new test file under `tests/unit/` for each handler, declared in `tests/unit.rs` with `#[path = "unit/{name}.rs"] mod {name};`.
 
-Name tests for behavior, for example `exchanges_refresh_token` or `loads_project_from_config`.
+**Integration tests** (`tests/integration/`) call the real API. Guard every test:
+
+```rust
+let Some((token, org, project)) = require_credentials() else { return };
+```
+
+`require_credentials()` is defined in `tests/integration.rs` and returns `None` if `FLOW_ACCESS_TOKEN`, `FLOW_ORG`, or `FLOW_PROJECT` are not set. On CI, the workflow hard-fails if these secrets are absent before running the integration binary.
+
+Name tests for behaviour: `requirements_list_returns_without_error`, `list_org_calls_get_on_org_members_path`.
 
 ## Commit & Pull Request Guidelines
 
-There is no existing Git history yet, so use clear imperative commit messages such as:
+Use clear imperative commit messages:
 
-- `Add raw request command`
-- `Document auth configuration`
+- `feat: add members command`
+- `refactor: split handlers.rs into per-resource modules`
+- `ci: add GitHub Actions CI workflow`
 
-Pull requests should include:
-
-- a short summary of the change
-- any API or config impact
-- the verification steps you ran
-- example CLI usage if behavior changed
+Pull requests should include a short summary, any API or config impact, the verification steps run, and example CLI usage if behaviour changed.
 
 ## Security & Configuration Tips
 
-Do not commit live Flow credentials or local config files. Prefer environment variables for sensitive values, and treat `~/.config/flow-cli/config.json` as local-only state.
+Do not commit live Flow credentials or local config files. Prefer environment variables for sensitive values. The config file (`~/.config/flow-cli/config.json`) is local-only state and should be in `.gitignore`.
