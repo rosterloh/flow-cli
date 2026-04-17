@@ -1,7 +1,7 @@
 // tests/unit/systems.rs
 use serde_json::json;
 
-use flow_cli::cli::systems::{SystemCommands, SystemItemArgs, SystemLinkPayloadArgs, SystemUnlinkTestCaseArgs};
+use flow_cli::cli::systems::{ListSystemsArgs, SystemCommands, SystemItemArgs, SystemLinkPayloadArgs, SystemUnlinkTestCaseArgs};
 use flow_cli::cli::{JsonPayloadArgs, ListArgs, PatchCollectionArgs, ResourceContextArgs};
 use flow_cli::config::Config;
 use flow_cli::handlers::handle_systems;
@@ -17,7 +17,7 @@ fn ctx(org: &str, project: &str) -> ResourceContextArgs {
 async fn list_always_calls_paged_path() {
     let mock = MockHttpClient::with_response(json!([]));
     handle_systems(
-        SystemCommands::List(ListArgs { context: ctx("o", "p"), paged: false, after: None, limit: None }),
+        SystemCommands::List(ListSystemsArgs { list: ListArgs { context: ctx("o", "p"), paged: false, after: None, limit: None }, top_level: false }),
         &mock, &Config::default(), OutputFormat::Json,
     ).await.unwrap();
     assert_eq!(mock.calls()[0].path, "/org/o/project/p/systems/paged");

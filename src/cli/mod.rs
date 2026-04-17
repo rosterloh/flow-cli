@@ -35,10 +35,11 @@ pub use projects::{CreateProjectArgs, ProjectCommands};
 pub use requirements::{
     ListRequirementsArgs, RequirementCommands, RequirementFileArgs, RequirementImageArgs,
     RequirementJiraArgs, RequirementLinkArgs, RequirementLinkTestCaseArgs, RequirementScope,
-    RequirementUnlinkArgs, RequirementUnlinkCrossProjectArgs, RequirementUnlinkJiraArgs,
+    RequirementSearchArgs, RequirementUnlinkArgs, RequirementUnlinkCrossProjectArgs,
+    RequirementUnlinkJiraArgs,
 };
 pub use systems::{
-    CreateSystemArgs, SystemCommands, SystemItemArgs, SystemLinkPayloadArgs,
+    CreateSystemArgs, ListSystemsArgs, SystemCommands, SystemItemArgs, SystemLinkPayloadArgs,
     SystemUnlinkRequirementArgs, SystemUnlinkTestCaseArgs, UpdateSystemArgs,
 };
 pub use test_cases::{

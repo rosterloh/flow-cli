@@ -18,12 +18,19 @@ pub async fn handle_systems<C: HttpSend>(
 ) -> Result<()> {
     match command {
         SystemCommands::List(args) => {
-            let (org, project) = resolve_context(&args.context, config)?;
+            let (org, project) = resolve_context(&args.list.context, config)?;
             // Always use paged endpoint — GET /systems is deprecated
             let path = format!("/org/{org}/project/{project}/systems/paged");
-            let query = list_query(&args.after, args.limit);
+            let query = list_query(&args.list.after, args.list.limit);
             let response = client.send(Method::GET, &path, &query, None, true).await?;
-            print_output(&response, output)?;
+            if args.top_level {
+                // Extract results array and filter to systems with no parent
+                let systems = response.get("results").and_then(|v| v.as_array()).cloned().unwrap_or_default();
+                let top: Vec<Value> = systems.into_iter().filter(|s| s.get("parentId").is_none()).collect();
+                print_output(&Value::Array(top), output)?;
+            } else {
+                print_output(&response, output)?;
+            }
         }
         SystemCommands::Create(args) => {
             let (org, project) = resolve_context(&args.context, config)?;

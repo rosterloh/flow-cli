@@ -1,6 +1,7 @@
 // src/handlers/requirements.rs
 use anyhow::Result;
 use reqwest::Method;
+use serde_json::json;
 
 use crate::cli::requirements::{RequirementCommands, RequirementScope};
 use crate::client::HttpSend;
@@ -188,6 +189,34 @@ pub async fn handle_requirements<C: HttpSend>(
             let path = format!("/org/{org}/project/{project}/requirements/configuration");
             let response = client.send(Method::DELETE, &path, &[], Some(body), true).await?;
             print_output(&response, output)?;
+        }
+        RequirementCommands::Search(args) => {
+            let (org, project) = resolve_context(&args.context, config)?;
+            let path = format!("/org/{org}/project/{project}/requirements/filter");
+            let all = client.send(Method::POST, &path, &[], Some(json!({})), true).await?;
+            let term = args.term.to_lowercase();
+            let hits: Vec<_> = all
+                .as_array()
+                .unwrap_or(&vec![])
+                .iter()
+                .filter(|r| {
+                    r.get("name")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_lowercase()
+                        .contains(&term)
+                })
+                .map(|r| json!({
+                    "id": r["id"],
+                    "name": r["name"],
+                    "owner": r.get("owner").cloned().unwrap_or(serde_json::Value::Null),
+                }))
+                .collect();
+            if hits.is_empty() {
+                println!("No requirements matched '{}'", args.term);
+            } else {
+                print_output(&serde_json::Value::Array(hits), output)?;
+            }
         }
     }
     Ok(())

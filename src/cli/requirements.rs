@@ -6,6 +6,7 @@ use super::{CreateNamedItemsArgs, ItemArgs, JsonPayloadArgs, ListArgs, PatchColl
 #[derive(Subcommand, Debug)]
 pub enum RequirementCommands {
     List(ListRequirementsArgs),
+    Search(RequirementSearchArgs),
     Get(ItemArgs),
     Create(CreateNamedItemsArgs),
     Patch(PatchCollectionArgs),
@@ -131,4 +132,12 @@ pub struct RequirementLinkTestCaseArgs {
     pub context: ResourceContextArgs,
     #[command(flatten)]
     pub payload: JsonPayloadArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct RequirementSearchArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(help = "Search term — case-insensitive, matches anywhere in the requirement name")]
+    pub term: String,
 }

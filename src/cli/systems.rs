@@ -5,7 +5,7 @@ use super::{JsonPayloadArgs, ListArgs, PatchCollectionArgs, ResourceContextArgs}
 
 #[derive(Subcommand, Debug)]
 pub enum SystemCommands {
-    List(ListArgs),
+    List(ListSystemsArgs),
     Create(CreateSystemArgs),
     Update(UpdateSystemArgs),
     Delete(SystemItemArgs),
@@ -21,6 +21,14 @@ pub enum SystemCommands {
     ListTestPlans(SystemItemArgs),
     LinkTestPlan(SystemLinkPayloadArgs),
     RenameCustomFieldOption(PatchCollectionArgs),
+}
+
+#[derive(Args, Debug, Clone)]
+pub struct ListSystemsArgs {
+    #[command(flatten)]
+    pub list: ListArgs,
+    #[arg(long, help = "Show only top-level systems (no parent)")]
+    pub top_level: bool,
 }
 
 #[derive(Args, Debug, Clone)]
