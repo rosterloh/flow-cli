@@ -1,0 +1,65 @@
+mod cli;
+mod client;
+mod config;
+mod handlers;
+
+use anyhow::Result;
+use clap::Parser;
+
+use crate::cli::{Cli, Commands};
+use crate::client::FlowClient;
+use crate::config::{Config, config_path};
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let cli = Cli::parse();
+    let config_path = config_path()?;
+    let mut config = Config::load(&config_path)?;
+
+    match cli.command {
+        Commands::Auth { command } => {
+            handlers::handle_auth(command, &mut config, &config_path).await?
+        }
+        Commands::Config { command } => {
+            handlers::handle_config(command, &mut config, &config_path)?
+        }
+        Commands::Orgs { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_orgs(command, &client).await?;
+        }
+        Commands::Projects { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_projects(command, &client, &config).await?;
+        }
+        Commands::Requirements { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_requirements(command, &client, &config).await?;
+        }
+        Commands::Systems { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_systems(command, &client, &config).await?;
+        }
+        Commands::TestCases { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_test_cases(command, &client, &config).await?;
+        }
+        Commands::TestPlans { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_test_plans(command, &client, &config).await?;
+        }
+        Commands::Values { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_values(command, &client, &config).await?;
+        }
+        Commands::Util { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_util(command, &client).await?;
+        }
+        Commands::Raw(command) => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_raw(command, &client).await?;
+        }
+    }
+
+    Ok(())
+}
