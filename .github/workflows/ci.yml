@@ -1,0 +1,66 @@
+# .github/workflows/ci.yml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  ci:
+    name: Check, lint, format, test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stable Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache cargo registry and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Check (fast compile error detection)
+        run: cargo check
+
+      - name: Clippy (fail on warnings)
+        run: cargo clippy -- -D warnings
+
+      - name: Format check
+        run: cargo fmt --check
+
+      - name: Unit tests
+        run: cargo test --test unit
+
+      - name: Verify integration credentials present
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          FLOW_ACCESS_TOKEN: ${{ secrets.FLOW_ACCESS_TOKEN }}
+          FLOW_ORG: ${{ secrets.FLOW_ORG }}
+          FLOW_PROJECT: ${{ secrets.FLOW_PROJECT }}
+        run: |
+          if [ -z "$FLOW_ACCESS_TOKEN" ] || [ -z "$FLOW_ORG" ] || [ -z "$FLOW_PROJECT" ]; then
+            echo "::error::Integration test secrets (FLOW_ACCESS_TOKEN, FLOW_ORG, FLOW_PROJECT) must be configured for CI on main. Add them as repository secrets."
+            exit 1
+          fi
+
+      - name: Integration tests
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          FLOW_ACCESS_TOKEN: ${{ secrets.FLOW_ACCESS_TOKEN }}
+          FLOW_ORG: ${{ secrets.FLOW_ORG }}
+          FLOW_PROJECT: ${{ secrets.FLOW_PROJECT }}
+        run: cargo test --test integration
