@@ -21,5 +21,7 @@ mod test_cases;
 mod test_cycles;
 #[path = "unit/test_plans.rs"]
 mod test_plans;
+#[path = "unit/test_runs.rs"]
+mod test_runs;
 #[path = "unit/values.rs"]
 mod values;

@@ -17,6 +17,8 @@ mod test_cases;
 mod test_cycles;
 #[path = "integration/test_plans.rs"]
 mod test_plans;
+#[path = "integration/test_runs.rs"]
+mod test_runs;
 #[path = "integration/values.rs"]
 mod values;
 

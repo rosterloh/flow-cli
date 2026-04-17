@@ -22,6 +22,7 @@ pub mod systems;
 pub mod test_cases;
 pub mod test_cycles;
 pub mod test_plans;
+pub mod test_runs;
 pub mod values;
 pub mod util;
 
@@ -38,6 +39,7 @@ pub use systems::handle_systems;
 pub use test_cases::handle_test_cases;
 pub use test_cycles::handle_test_cycles;
 pub use test_plans::handle_test_plans;
+pub use test_runs::handle_test_runs;
 pub use values::handle_values;
 pub use util::{handle_raw, handle_util};
 
