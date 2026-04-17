@@ -53,10 +53,10 @@ pub use util::{ConvertHtmlArgs, UtilCommands};
 
 #[derive(Parser, Debug)]
 #[command(
-    name = "flow-cli",
+    name = "flow",
     about = "CLI for the Flow Engineering REST API",
     version,
-    after_help = "Examples:\n  flow-cli auth exchange --refresh-token \"$FLOW_REFRESH_TOKEN\" --save\n  flow-cli config set-context --org my-org --project my-project\n  flow-cli orgs list\n  flow-cli projects list --org my-org\n  flow-cli requirements list --paged --limit 50\n  flow-cli raw GET /orgs\n"
+    after_help = "Examples:\n  flow auth exchange --refresh-token \"$FLOW_REFRESH_TOKEN\" --save\n  flow config set-context --org my-org --project my-project\n  flow orgs list\n  flow projects list --org my-org\n  flow requirements list --paged --limit 50\n  flow raw GET /orgs\n"
 )]
 pub struct Cli {
     #[arg(long, global = true, default_value = "json", value_enum)]
