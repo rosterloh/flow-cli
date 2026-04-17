@@ -24,9 +24,15 @@ pub async fn handle_systems<C: HttpSend>(
             let query = list_query(&args.list.after, args.list.limit);
             let response = client.send(Method::GET, &path, &query, None, true).await?;
             if args.top_level {
-                // Extract results array and filter to systems with no parent
                 let systems = response.get("results").and_then(|v| v.as_array()).cloned().unwrap_or_default();
-                let top: Vec<Value> = systems.into_iter().filter(|s| s.get("parentId").is_none()).collect();
+                let top: Vec<Value> = systems
+                    .into_iter()
+                    .filter(|s| s.get("parentId").is_none())
+                    .map(|s| json!({
+                        "id": s["id"],
+                        "name": s["name"],
+                    }))
+                    .collect();
                 print_output(&Value::Array(top), output)?;
             } else {
                 print_output(&response, output)?;
