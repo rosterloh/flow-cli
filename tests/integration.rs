@@ -13,6 +13,8 @@ mod requirements;
 mod systems;
 #[path = "integration/test_cases.rs"]
 mod test_cases;
+#[path = "integration/test_cycles.rs"]
+mod test_cycles;
 #[path = "integration/test_plans.rs"]
 mod test_plans;
 #[path = "integration/values.rs"]

@@ -15,6 +15,7 @@ pub mod projects;
 pub mod requirements;
 pub mod systems;
 pub mod test_cases;
+pub mod test_cycles;
 pub mod test_plans;
 pub mod values;
 pub mod util;
@@ -43,6 +44,7 @@ pub use test_cases::{
     TestCaseCommands, TestCaseItemArgs, TestCaseItemPayloadArgs,
     TestCaseUnlinkJiraArgs, TestCaseUploadFileArgs,
 };
+pub use test_cycles::{TestCycleCommands, TestCycleItemArgs};
 pub use test_plans::{TestPlanCommands, TestPlanItemArgs, TestPlanItemPayloadArgs};
 pub use values::{ListValuesArgs, SetNumberValueArgs, ValueCommands, ValueItemArgs};
 pub use util::{ConvertHtmlArgs, UtilCommands};
@@ -94,6 +96,10 @@ pub enum Commands {
     TestCases {
         #[command(subcommand)]
         command: TestCaseCommands,
+    },
+    TestCycles {
+        #[command(subcommand)]
+        command: TestCycleCommands,
     },
     TestPlans {
         #[command(subcommand)]
