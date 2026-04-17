@@ -1,7 +1,7 @@
 // src/cli/systems.rs
 use clap::{Args, Subcommand};
 
-use super::{JsonPayloadArgs, ListArgs, ResourceContextArgs};
+use super::{JsonPayloadArgs, ListArgs, PatchCollectionArgs, ResourceContextArgs};
 
 #[derive(Subcommand, Debug)]
 pub enum SystemCommands {
@@ -9,6 +9,18 @@ pub enum SystemCommands {
     Create(CreateSystemArgs),
     Update(UpdateSystemArgs),
     Delete(SystemItemArgs),
+    BulkUpdate(PatchCollectionArgs),
+    ListDocuments(SystemItemArgs),
+    LinkDocument(SystemLinkPayloadArgs),
+    ListRequirements(SystemItemArgs),
+    LinkRequirement(SystemLinkPayloadArgs),
+    UnlinkRequirement(SystemUnlinkRequirementArgs),
+    ListTestCases(SystemItemArgs),
+    LinkTestCase(SystemLinkPayloadArgs),
+    UnlinkTestCase(SystemUnlinkTestCaseArgs),
+    ListTestPlans(SystemItemArgs),
+    LinkTestPlan(SystemLinkPayloadArgs),
+    RenameCustomFieldOption(PatchCollectionArgs),
 }
 
 #[derive(Args, Debug, Clone)]
@@ -17,6 +29,36 @@ pub struct SystemItemArgs {
     pub context: ResourceContextArgs,
     #[arg(long)]
     pub id: String,
+}
+
+#[derive(Args, Debug)]
+pub struct SystemLinkPayloadArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: String,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct SystemUnlinkRequirementArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: String,
+    #[arg(long)]
+    pub requirement_id: i64,
+}
+
+#[derive(Args, Debug)]
+pub struct SystemUnlinkTestCaseArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: String,
+    #[arg(long)]
+    pub test_case_id: i64,
 }
 
 #[derive(Args, Debug)]

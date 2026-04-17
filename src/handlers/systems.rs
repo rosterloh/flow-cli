@@ -3,7 +3,7 @@ use anyhow::Result;
 use reqwest::Method;
 use serde_json::{Value, json};
 
-use crate::cli::SystemCommands;
+use crate::cli::systems::SystemCommands;
 use crate::client::HttpSend;
 use crate::config::Config;
 use crate::output::{OutputFormat, print_output};
@@ -19,11 +19,8 @@ pub async fn handle_systems<C: HttpSend>(
     match command {
         SystemCommands::List(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let path = if args.paged {
-                format!("/org/{org}/project/{project}/systems/paged")
-            } else {
-                format!("/org/{org}/project/{project}/systems")
-            };
+            // Always use paged endpoint — GET /systems is deprecated
+            let path = format!("/org/{org}/project/{project}/systems/paged");
             let query = list_query(&args.after, args.limit);
             let response = client.send(Method::GET, &path, &query, None, true).await?;
             print_output(&response, output)?;
@@ -60,6 +57,84 @@ pub async fn handle_systems<C: HttpSend>(
             let (org, project) = resolve_context(&args.context, config)?;
             let path = format!("/org/{org}/project/{project}/system/{}", args.id);
             let response = client.send(Method::DELETE, &path, &[], None, true).await?;
+            print_output(&response, output)?;
+        }
+        SystemCommands::BulkUpdate(args) => {
+            let (org, project) = resolve_context(&args.context, config)?;
+            let body = load_json_payload(&args.payload)?;
+            let path = format!("/org/{org}/project/{project}/systems");
+            let response = client.send(Method::PUT, &path, &[], Some(body), true).await?;
+            print_output(&response, output)?;
+        }
+        SystemCommands::ListDocuments(args) => {
+            let (org, project) = resolve_context(&args.context, config)?;
+            let path = format!("/org/{org}/project/{project}/system/{}/links/documents", args.id);
+            let response = client.send(Method::GET, &path, &[], None, true).await?;
+            print_output(&response, output)?;
+        }
+        SystemCommands::LinkDocument(args) => {
+            let (org, project) = resolve_context(&args.context, config)?;
+            let body = load_json_payload(&args.payload)?;
+            let path = format!("/org/{org}/project/{project}/system/{}/links/documents", args.id);
+            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            print_output(&response, output)?;
+        }
+        SystemCommands::ListRequirements(args) => {
+            let (org, project) = resolve_context(&args.context, config)?;
+            let path = format!("/org/{org}/project/{project}/system/{}/links/requirements", args.id);
+            let response = client.send(Method::GET, &path, &[], None, true).await?;
+            print_output(&response, output)?;
+        }
+        SystemCommands::LinkRequirement(args) => {
+            let (org, project) = resolve_context(&args.context, config)?;
+            let body = load_json_payload(&args.payload)?;
+            let path = format!("/org/{org}/project/{project}/system/{}/links/requirements", args.id);
+            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            print_output(&response, output)?;
+        }
+        SystemCommands::UnlinkRequirement(args) => {
+            let (org, project) = resolve_context(&args.context, config)?;
+            let path = format!("/org/{org}/project/{project}/system/{}/links/requirement/{}", args.id, args.requirement_id);
+            let response = client.send(Method::DELETE, &path, &[], None, true).await?;
+            print_output(&response, output)?;
+        }
+        SystemCommands::ListTestCases(args) => {
+            let (org, project) = resolve_context(&args.context, config)?;
+            let path = format!("/org/{org}/project/{project}/system/{}/links/testCases", args.id);
+            let response = client.send(Method::GET, &path, &[], None, true).await?;
+            print_output(&response, output)?;
+        }
+        SystemCommands::LinkTestCase(args) => {
+            let (org, project) = resolve_context(&args.context, config)?;
+            let body = load_json_payload(&args.payload)?;
+            let path = format!("/org/{org}/project/{project}/system/{}/links/testCases", args.id);
+            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            print_output(&response, output)?;
+        }
+        SystemCommands::UnlinkTestCase(args) => {
+            let (org, project) = resolve_context(&args.context, config)?;
+            let path = format!("/org/{org}/project/{project}/system/{}/links/testCase/{}", args.id, args.test_case_id);
+            let response = client.send(Method::DELETE, &path, &[], None, true).await?;
+            print_output(&response, output)?;
+        }
+        SystemCommands::ListTestPlans(args) => {
+            let (org, project) = resolve_context(&args.context, config)?;
+            let path = format!("/org/{org}/project/{project}/system/{}/links/testPlans", args.id);
+            let response = client.send(Method::GET, &path, &[], None, true).await?;
+            print_output(&response, output)?;
+        }
+        SystemCommands::LinkTestPlan(args) => {
+            let (org, project) = resolve_context(&args.context, config)?;
+            let body = load_json_payload(&args.payload)?;
+            let path = format!("/org/{org}/project/{project}/system/{}/links/testPlans", args.id);
+            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            print_output(&response, output)?;
+        }
+        SystemCommands::RenameCustomFieldOption(args) => {
+            let (org, project) = resolve_context(&args.context, config)?;
+            let body = load_json_payload(&args.payload)?;
+            let path = format!("/org/{org}/project/{project}/systems/customFields/renameOption");
+            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
             print_output(&response, output)?;
         }
     }

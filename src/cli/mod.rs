@@ -24,7 +24,10 @@ pub use requirements::{
     RequirementJiraArgs, RequirementLinkArgs, RequirementLinkTestCaseArgs, RequirementScope,
     RequirementUnlinkArgs, RequirementUnlinkCrossProjectArgs, RequirementUnlinkJiraArgs,
 };
-pub use systems::{CreateSystemArgs, SystemCommands, SystemItemArgs, UpdateSystemArgs};
+pub use systems::{
+    CreateSystemArgs, SystemCommands, SystemItemArgs, SystemLinkPayloadArgs,
+    SystemUnlinkRequirementArgs, SystemUnlinkTestCaseArgs, UpdateSystemArgs,
+};
 pub use test_cases::{TestCaseCommands, TestCaseItemArgs};
 pub use test_plans::TestPlanCommands;
 pub use values::{ListValuesArgs, SetNumberValueArgs, ValueCommands};
