@@ -255,13 +255,14 @@ Matrix: runs on `ubuntu-latest`. Rust toolchain pinned to stable via `dtolnay/ru
 
 ### `release.yml` — runs on push of a `v*` tag (e.g. `v1.0.0`)
 
-1. Builds release binaries for three targets:
-   - `x86_64-unknown-linux-gnu`
-   - `x86_64-apple-darwin`
-   - `aarch64-apple-darwin`
-2. Uses `cross` for cross-compilation where the runner can't build natively.
-3. Strips and archives each binary as `flow-{target}.tar.gz`.
-4. Creates a GitHub Release via `softprops/action-gh-release` and uploads all three archives as release assets.
+1. Builds release binaries for four targets:
+   - `x86_64-unknown-linux-gnu` (runs on `ubuntu-latest`)
+   - `x86_64-apple-darwin` (runs on `macos-latest`)
+   - `aarch64-apple-darwin` (runs on `macos-latest`)
+   - `x86_64-pc-windows-msvc` (runs on `windows-latest`)
+2. Each target runs in its own matrix job on the appropriate native runner — no cross-compilation needed.
+3. Linux/macOS binaries are stripped and archived as `flow-{target}.tar.gz`. The Windows binary is archived as `flow-x86_64-pc-windows-msvc.zip`.
+4. Creates a GitHub Release via `softprops/action-gh-release` and uploads all four archives as release assets.
 
 The release workflow requires a `GITHUB_TOKEN` (automatically provided by Actions) — no additional secrets needed for publishing.
 
