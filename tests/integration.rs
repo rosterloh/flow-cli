@@ -1,4 +1,6 @@
 // tests/integration.rs
+#[path = "integration/requirements.rs"]
+mod requirements;
 
 /// Returns `(token, org, project)` from env vars, or `None` if any are absent.
 /// In local dev: call this at the top of every test and `return` early if None.

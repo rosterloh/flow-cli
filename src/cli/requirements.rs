@@ -1,13 +1,134 @@
 // src/cli/requirements.rs
-use clap::Subcommand;
+use clap::{Args, Subcommand, ValueEnum};
 
-use super::{CreateNamedItemsArgs, ItemArgs, ListArgs, PatchCollectionArgs};
+use super::{CreateNamedItemsArgs, ItemArgs, JsonPayloadArgs, ListArgs, PatchCollectionArgs, ResourceContextArgs};
 
 #[derive(Subcommand, Debug)]
 pub enum RequirementCommands {
-    List(ListArgs),
+    List(ListRequirementsArgs),
     Get(ItemArgs),
     Create(CreateNamedItemsArgs),
     Patch(PatchCollectionArgs),
     Delete(ItemArgs),
+    Filter(PatchCollectionArgs),
+    SetStage(PatchCollectionArgs),
+    SetImportId(PatchCollectionArgs),
+    SetValue(PatchCollectionArgs),
+    ListTestCases(ItemArgs),
+    ListTestPlans(ItemArgs),
+    UploadFile(RequirementFileArgs),
+    UploadImage(RequirementImageArgs),
+    LinkJira(RequirementJiraArgs),
+    UnlinkJira(RequirementUnlinkJiraArgs),
+    Link(RequirementLinkArgs),
+    Unlink(RequirementUnlinkArgs),
+    UnlinkCrossProject(RequirementUnlinkCrossProjectArgs),
+    LinkTestCase(RequirementLinkTestCaseArgs),
+    LinkTestCaseCrossProject(RequirementLinkTestCaseArgs),
+    GetCustomFields(ResourceContextArgs),
+    PatchCustomFields(PatchCollectionArgs),
+    RenameCustomFieldOption(PatchCollectionArgs),
+    AddConfiguration(PatchCollectionArgs),
+    RemoveConfiguration(PatchCollectionArgs),
+}
+
+#[derive(Args, Debug, Clone)]
+pub struct ListRequirementsArgs {
+    #[command(flatten)]
+    pub list: ListArgs,
+    #[arg(long, value_enum)]
+    pub scope: Option<RequirementScope>,
+}
+
+#[derive(Copy, Clone, Debug, ValueEnum)]
+pub enum RequirementScope {
+    Org,
+    Project,
+    WithoutSystem,
+}
+
+#[derive(Args, Debug)]
+pub struct RequirementFileArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: i64,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct RequirementImageArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: i64,
+    #[arg(long)]
+    pub file_id: String,
+}
+
+#[derive(Args, Debug)]
+pub struct RequirementJiraArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: i64,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct RequirementUnlinkJiraArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: i64,
+    #[arg(long)]
+    pub jira_issue_id: String,
+}
+
+#[derive(Args, Debug)]
+pub struct RequirementLinkArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: i64,
+    #[arg(long)]
+    pub link_type: String,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct RequirementUnlinkArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: i64,
+    #[arg(long)]
+    pub link_type: String,
+    #[arg(long)]
+    pub linked_requirement_id: i64,
+}
+
+#[derive(Args, Debug)]
+pub struct RequirementUnlinkCrossProjectArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: i64,
+    #[arg(long)]
+    pub link_type: String,
+    #[arg(long)]
+    pub linked_project: String,
+    #[arg(long)]
+    pub linked_requirement_id: i64,
+}
+
+#[derive(Args, Debug)]
+pub struct RequirementLinkTestCaseArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
 }

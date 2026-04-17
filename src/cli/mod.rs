@@ -19,7 +19,11 @@ pub use auth::{AuthCommands, ExchangeAuthArgs, SetBasicArgs, SetBearerArgs};
 pub use config::ConfigCommands;
 pub use orgs::OrgsCommands;
 pub use projects::{CreateProjectArgs, ProjectCommands};
-pub use requirements::RequirementCommands;
+pub use requirements::{
+    ListRequirementsArgs, RequirementCommands, RequirementFileArgs, RequirementImageArgs,
+    RequirementJiraArgs, RequirementLinkArgs, RequirementLinkTestCaseArgs, RequirementScope,
+    RequirementUnlinkArgs, RequirementUnlinkCrossProjectArgs, RequirementUnlinkJiraArgs,
+};
 pub use systems::{CreateSystemArgs, SystemCommands, SystemItemArgs, UpdateSystemArgs};
 pub use test_cases::{TestCaseCommands, TestCaseItemArgs};
 pub use test_plans::TestPlanCommands;
