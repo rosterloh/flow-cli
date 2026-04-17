@@ -6,6 +6,7 @@ use reqwest::Method;
 
 pub mod auth;
 pub mod config;
+pub mod documents;
 pub mod orgs;
 pub mod projects;
 pub mod requirements;
@@ -17,6 +18,7 @@ pub mod util;
 
 pub use auth::{AuthCommands, ExchangeAuthArgs, SetBasicArgs, SetBearerArgs};
 pub use config::ConfigCommands;
+pub use documents::{DocumentCommands, DocumentItemArgs};
 pub use orgs::OrgsCommands;
 pub use projects::{CreateProjectArgs, ProjectCommands};
 pub use requirements::{
@@ -83,6 +85,10 @@ pub enum Commands {
     TestPlans {
         #[command(subcommand)]
         command: TestPlanCommands,
+    },
+    Documents {
+        #[command(subcommand)]
+        command: DocumentCommands,
     },
     Values {
         #[command(subcommand)]

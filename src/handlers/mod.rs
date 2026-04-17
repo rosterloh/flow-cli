@@ -11,6 +11,7 @@ use crate::output::{OutputFormat, print_output};
 
 pub mod auth;
 pub mod config;
+pub mod documents;
 pub mod orgs;
 pub mod projects;
 pub mod requirements;
@@ -22,6 +23,7 @@ pub mod util;
 
 pub use auth::handle_auth;
 pub use config::handle_config;
+pub use documents::handle_documents;
 pub use orgs::handle_orgs;
 pub use projects::handle_projects;
 pub use requirements::handle_requirements;

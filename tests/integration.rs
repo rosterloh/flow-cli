@@ -1,4 +1,6 @@
 // tests/integration.rs
+#[path = "integration/documents.rs"]
+mod documents;
 #[path = "integration/requirements.rs"]
 mod requirements;
 #[path = "integration/systems.rs"]

@@ -45,6 +45,10 @@ async fn main() -> Result<()> {
             let client = FlowClient::from_config(&config)?;
             handlers::handle_test_plans(command, &client, &config, output).await?;
         }
+        Commands::Documents { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_documents(command, &client, &config, output).await?;
+        }
         Commands::Values { command } => {
             let client = FlowClient::from_config(&config)?;
             handlers::handle_values(command, &client, &config, output).await?;

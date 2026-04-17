@@ -1,5 +1,7 @@
 // tests/unit.rs
 pub mod helpers;
+#[path = "unit/documents.rs"]
+mod documents;
 #[path = "unit/orgs.rs"]
 mod orgs;
 mod output;
