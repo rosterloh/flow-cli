@@ -9,3 +9,5 @@ mod requirements;
 mod systems;
 #[path = "unit/test_cases.rs"]
 mod test_cases;
+#[path = "unit/test_plans.rs"]
+mod test_plans;

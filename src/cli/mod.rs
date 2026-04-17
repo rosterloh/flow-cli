@@ -32,7 +32,7 @@ pub use test_cases::{
     TestCaseCommands, TestCaseItemArgs, TestCaseItemPayloadArgs,
     TestCaseUnlinkJiraArgs, TestCaseUploadFileArgs,
 };
-pub use test_plans::TestPlanCommands;
+pub use test_plans::{TestPlanCommands, TestPlanItemArgs, TestPlanItemPayloadArgs};
 pub use values::{ListValuesArgs, SetNumberValueArgs, ValueCommands};
 pub use util::{ConvertHtmlArgs, UtilCommands};
 
