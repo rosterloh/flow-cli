@@ -21,9 +21,9 @@
 - Modify: `src/handlers/mod.rs`
 - Modify: `src/main.rs`
 - Create: `tests/unit/documents.rs`
-- Modify: `tests/unit/mod.rs`
+- Modify: `tests/unit.rs`
 - Create: `tests/integration/documents.rs`
-- Modify: `tests/integration/mod.rs`
+- Modify: `tests/integration.rs`
 
 - [ ] **Step 1: Write failing unit tests in `tests/unit/documents.rs`**
 
@@ -110,10 +110,10 @@ async fn set_import_id_calls_put_on_importid_path() {
 }
 ```
 
-- [ ] **Step 2: Add `mod documents;` to `tests/unit/mod.rs`**
+- [ ] **Step 2: Add `mod documents;` to `tests/unit.rs`**
 
 ```rust
-// tests/unit/mod.rs
+// tests/unit.rs
 pub mod helpers;
 mod documents;
 mod orgs;
@@ -294,10 +294,10 @@ async fn documents_list_succeeds() {
 }
 ```
 
-- [ ] **Step 11: Add `mod documents;` to `tests/integration/mod.rs`**
+- [ ] **Step 11: Add `mod documents;` to `tests/integration.rs`**
 
 ```rust
-// tests/integration/mod.rs
+// tests/integration.rs
 mod documents;
 mod requirements;
 mod systems;
@@ -326,8 +326,8 @@ Expected: all tests pass.
 ```bash
 git add src/cli/documents.rs src/handlers/documents.rs \
         src/cli/mod.rs src/handlers/mod.rs src/main.rs \
-        tests/unit/documents.rs tests/unit/mod.rs \
-        tests/integration/documents.rs tests/integration/mod.rs
+        tests/unit/documents.rs tests/unit.rs \
+        tests/integration/documents.rs tests/integration.rs
 git commit -m "feat: add documents command"
 ```
 
@@ -342,9 +342,9 @@ git commit -m "feat: add documents command"
 - Modify: `src/handlers/mod.rs`
 - Modify: `src/main.rs`
 - Create: `tests/unit/interfaces.rs`
-- Modify: `tests/unit/mod.rs`
+- Modify: `tests/unit.rs`
 - Create: `tests/integration/interfaces.rs`
-- Modify: `tests/integration/mod.rs`
+- Modify: `tests/integration.rs`
 
 - [ ] **Step 1: Write failing unit tests in `tests/unit/interfaces.rs`**
 
@@ -404,10 +404,10 @@ async fn delete_calls_delete_on_interface_id_path() {
 }
 ```
 
-- [ ] **Step 2: Add `mod interfaces;` to `tests/unit/mod.rs`**
+- [ ] **Step 2: Add `mod interfaces;` to `tests/unit.rs`**
 
 ```rust
-// tests/unit/mod.rs
+// tests/unit.rs
 pub mod helpers;
 mod documents;
 mod interfaces;
@@ -549,7 +549,7 @@ async fn interfaces_list_succeeds() {
 }
 ```
 
-- [ ] **Step 10: Add `mod interfaces;` to `tests/integration/mod.rs`** — add `mod interfaces;` alongside the other mods.
+- [ ] **Step 10: Add `mod interfaces;` to `tests/integration.rs`** — add `mod interfaces;` alongside the other mods.
 
 - [ ] **Step 11: Run `cargo test --test unit && cargo build`**
 
@@ -564,8 +564,8 @@ Expected: all tests pass, clean build.
 ```bash
 git add src/cli/interfaces.rs src/handlers/interfaces.rs \
         src/cli/mod.rs src/handlers/mod.rs src/main.rs \
-        tests/unit/interfaces.rs tests/unit/mod.rs \
-        tests/integration/interfaces.rs tests/integration/mod.rs
+        tests/unit/interfaces.rs tests/unit.rs \
+        tests/integration/interfaces.rs tests/integration.rs
 git commit -m "feat: add interfaces command"
 ```
 
@@ -578,9 +578,9 @@ git commit -m "feat: add interfaces command"
 - Create: `src/handlers/members.rs`
 - Modify: `src/cli/mod.rs`, `src/handlers/mod.rs`, `src/main.rs`
 - Create: `tests/unit/members.rs`
-- Modify: `tests/unit/mod.rs`
+- Modify: `tests/unit.rs`
 - Create: `tests/integration/members.rs`
-- Modify: `tests/integration/mod.rs`
+- Modify: `tests/integration.rs`
 
 - [ ] **Step 1: Write failing unit tests in `tests/unit/members.rs`**
 
@@ -653,10 +653,10 @@ async fn add_project_calls_post_on_project_members_path() {
 }
 ```
 
-- [ ] **Step 2: Add `mod members;` to `tests/unit/mod.rs`**
+- [ ] **Step 2: Add `mod members;` to `tests/unit.rs`**
 
 ```rust
-// tests/unit/mod.rs
+// tests/unit.rs
 pub mod helpers;
 mod documents;
 mod interfaces;
@@ -848,7 +848,7 @@ async fn members_list_org_succeeds() {
 }
 ```
 
-- [ ] **Step 10: Add `mod members;` to `tests/integration/mod.rs`** — add `mod members;` alongside the other mods.
+- [ ] **Step 10: Add `mod members;` to `tests/integration.rs`** — add `mod members;` alongside the other mods.
 
 - [ ] **Step 11: Run `cargo test --test unit && cargo build`**
 
@@ -861,8 +861,8 @@ cargo test --test unit && cargo build
 ```bash
 git add src/cli/members.rs src/handlers/members.rs \
         src/cli/mod.rs src/handlers/mod.rs src/main.rs \
-        tests/unit/members.rs tests/unit/mod.rs \
-        tests/integration/members.rs tests/integration/mod.rs
+        tests/unit/members.rs tests/unit.rs \
+        tests/integration/members.rs tests/integration.rs
 git commit -m "feat: add members command"
 ```
 
@@ -875,9 +875,9 @@ git commit -m "feat: add members command"
 - Create: `src/handlers/configurations.rs`
 - Modify: `src/cli/mod.rs`, `src/handlers/mod.rs`, `src/main.rs`
 - Create: `tests/unit/configurations.rs`
-- Modify: `tests/unit/mod.rs`
+- Modify: `tests/unit.rs`
 - Create: `tests/integration/configurations.rs`
-- Modify: `tests/integration/mod.rs`
+- Modify: `tests/integration.rs`
 
 - [ ] **Step 1: Write failing unit tests in `tests/unit/configurations.rs`**
 
@@ -925,10 +925,10 @@ async fn create_calls_post_on_configurations_path() {
 }
 ```
 
-- [ ] **Step 2: Add `mod configurations;` to `tests/unit/mod.rs`**
+- [ ] **Step 2: Add `mod configurations;` to `tests/unit.rs`**
 
 ```rust
-// tests/unit/mod.rs
+// tests/unit.rs
 pub mod helpers;
 mod configurations;
 mod documents;
@@ -1051,7 +1051,7 @@ async fn configurations_list_succeeds() {
 }
 ```
 
-- [ ] **Step 10: Add `mod configurations;` to `tests/integration/mod.rs`** — add `mod configurations;` alongside the other mods.
+- [ ] **Step 10: Add `mod configurations;` to `tests/integration.rs`** — add `mod configurations;` alongside the other mods.
 
 - [ ] **Step 11: Run `cargo test --test unit && cargo build`**
 
@@ -1064,8 +1064,8 @@ cargo test --test unit && cargo build
 ```bash
 git add src/cli/configurations.rs src/handlers/configurations.rs \
         src/cli/mod.rs src/handlers/mod.rs src/main.rs \
-        tests/unit/configurations.rs tests/unit/mod.rs \
-        tests/integration/configurations.rs tests/integration/mod.rs
+        tests/unit/configurations.rs tests/unit.rs \
+        tests/integration/configurations.rs tests/integration.rs
 git commit -m "feat: add configurations command"
 ```
 
@@ -1078,9 +1078,9 @@ git commit -m "feat: add configurations command"
 - Create: `src/handlers/test_cycles.rs`
 - Modify: `src/cli/mod.rs`, `src/handlers/mod.rs`, `src/main.rs`
 - Create: `tests/unit/test_cycles.rs`
-- Modify: `tests/unit/mod.rs`
+- Modify: `tests/unit.rs`
 - Create: `tests/integration/test_cycles.rs`
-- Modify: `tests/integration/mod.rs`
+- Modify: `tests/integration.rs`
 
 - [ ] **Step 1: Write failing unit tests in `tests/unit/test_cycles.rs`**
 
@@ -1125,10 +1125,10 @@ async fn delete_calls_delete_on_test_cycle_id_path() {
 }
 ```
 
-- [ ] **Step 2: Add `mod test_cycles;` to `tests/unit/mod.rs`**
+- [ ] **Step 2: Add `mod test_cycles;` to `tests/unit.rs`**
 
 ```rust
-// tests/unit/mod.rs
+// tests/unit.rs
 pub mod helpers;
 mod configurations;
 mod documents;
@@ -1239,7 +1239,7 @@ async fn test_cycles_get_skips_without_cycle_id() {
 }
 ```
 
-- [ ] **Step 10: Add `mod test_cycles;` to `tests/integration/mod.rs`** — add `mod test_cycles;` alongside the other mods.
+- [ ] **Step 10: Add `mod test_cycles;` to `tests/integration.rs`** — add `mod test_cycles;` alongside the other mods.
 
 - [ ] **Step 11: Run `cargo test --test unit && cargo build`**
 
@@ -1252,8 +1252,8 @@ cargo test --test unit && cargo build
 ```bash
 git add src/cli/test_cycles.rs src/handlers/test_cycles.rs \
         src/cli/mod.rs src/handlers/mod.rs src/main.rs \
-        tests/unit/test_cycles.rs tests/unit/mod.rs \
-        tests/integration/test_cycles.rs tests/integration/mod.rs
+        tests/unit/test_cycles.rs tests/unit.rs \
+        tests/integration/test_cycles.rs tests/integration.rs
 git commit -m "feat: add test-cycles command"
 ```
 
@@ -1266,9 +1266,9 @@ git commit -m "feat: add test-cycles command"
 - Create: `src/handlers/test_runs.rs`
 - Modify: `src/cli/mod.rs`, `src/handlers/mod.rs`, `src/main.rs`
 - Create: `tests/unit/test_runs.rs`
-- Modify: `tests/unit/mod.rs`
+- Modify: `tests/unit.rs`
 - Create: `tests/integration/test_runs.rs`
-- Modify: `tests/integration/mod.rs`
+- Modify: `tests/integration.rs`
 
 - [ ] **Step 1: Write failing unit tests in `tests/unit/test_runs.rs`**
 
@@ -1347,10 +1347,10 @@ async fn set_steps_calls_put_on_steps_path() {
 }
 ```
 
-- [ ] **Step 2: Add `mod test_runs;` to `tests/unit/mod.rs`**
+- [ ] **Step 2: Add `mod test_runs;` to `tests/unit.rs`**
 
 ```rust
-// tests/unit/mod.rs
+// tests/unit.rs
 pub mod helpers;
 mod configurations;
 mod documents;
@@ -1501,10 +1501,10 @@ async fn test_runs_skip_without_cycle_id() {
 }
 ```
 
-- [ ] **Step 10: Add `mod test_runs;` to `tests/integration/mod.rs`**
+- [ ] **Step 10: Add `mod test_runs;` to `tests/integration.rs`**
 
 ```rust
-// tests/integration/mod.rs
+// tests/integration.rs
 mod configurations;
 mod documents;
 mod interfaces;
@@ -1538,8 +1538,8 @@ Expected: all unit tests pass, integration tests skip without credentials.
 ```bash
 git add src/cli/test_runs.rs src/handlers/test_runs.rs \
         src/cli/mod.rs src/handlers/mod.rs src/main.rs \
-        tests/unit/test_runs.rs tests/unit/mod.rs \
-        tests/integration/test_runs.rs tests/integration/mod.rs
+        tests/unit/test_runs.rs tests/unit.rs \
+        tests/integration/test_runs.rs tests/integration.rs
 git commit -m "feat: add test-runs command"
 ```
 

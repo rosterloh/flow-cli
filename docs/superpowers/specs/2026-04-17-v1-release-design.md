@@ -211,30 +211,35 @@ All new commands accept `--org` / `--project` context args (env: `FLOW_ORG`, `FL
 
 ## Test Suite
 
-### Unit tests (`tests/unit/`)
+### Library target
 
-`FlowClient` gains an `HttpSend` trait:
+`src/lib.rs` exposes all modules publicly so test binaries in `tests/` can import them via `flow_cli::`. This is required — without a lib target Cargo cannot compile the integration test binaries.
+
+### Unit tests
+
+Entry point: `tests/unit.rs` (Cargo test binary: `cargo test --test unit`). Submodules live in `tests/unit/`. `FlowClient` gains an `HttpSend` trait:
 
 ```rust
-pub trait HttpSend {
+pub trait HttpSend: Send + Sync {
     async fn send(&self, method: Method, path: &str, query: &[(String, String)], body: Option<Value>, with_auth: bool) -> Result<Value>;
 }
 ```
 
-`FlowClient` implements `HttpSend`. Tests inject a `MockHttpClient` that returns pre-canned JSON. Each handler test file verifies:
+`FlowClient` implements `HttpSend`. Tests inject a `MockHttpClient` (in `tests/unit/helpers.rs`) that returns pre-canned JSON. Each handler test file verifies:
 - Correct URL path and HTTP method constructed
 - Query params built correctly (pagination, filters, scopes)
 - Output formatted correctly for both JSON and table modes
 - Error paths (missing org/project, missing required flags, bad API response)
 
-### Integration tests (`tests/integration/`)
+### Integration tests
 
-`tests/integration/mod.rs` provides a `require_credentials()` helper — returns early if `FLOW_ACCESS_TOKEN`, `FLOW_ORG`, or `FLOW_PROJECT` are not set. Each test calls this at the top. Tests exercise the full CRUD lifecycle where the API supports it and clean up created resources in a `defer`-style pattern.
+Entry point: `tests/integration.rs` (Cargo test binary: `cargo test --test integration`). Submodules live in `tests/integration/`. `require_credentials()` returns `None` for local dev (tests skip gracefully). On CI for `main` pushes, the workflow validates credentials are present **before** invoking the binary — missing secrets are a hard CI failure, not a silent pass. Tests exercise the full CRUD lifecycle and clean up created resources at the end of each test.
 
 **Running tests:**
 ```bash
-cargo test                                                        # unit only
-FLOW_ACCESS_TOKEN=xxx FLOW_ORG=xxx FLOW_PROJECT=xxx cargo test   # all tests
+cargo test --test unit                                                              # unit tests only
+FLOW_ACCESS_TOKEN=xxx FLOW_ORG=xxx FLOW_PROJECT=xxx cargo test --test integration  # integration tests
+cargo test                                                                          # both
 ```
 
 ---
@@ -248,20 +253,21 @@ Two workflows live in `.github/workflows/`.
 1. **Check** — `cargo check` to catch compile errors fast
 2. **Lint** — `cargo clippy -- -D warnings` (fail on any warning)
 3. **Format** — `cargo fmt --check`
-4. **Unit tests** — `cargo test` (no credentials, always runs)
-5. **Integration tests** — `cargo test` with `FLOW_ACCESS_TOKEN`, `FLOW_ORG`, and `FLOW_PROJECT` injected from GitHub repository secrets. Runs only on push to `main` (not on PRs from forks, which can't access secrets). If secrets are absent the test suite skips gracefully.
+4. **Unit tests** — `cargo test --test unit` (no credentials, always runs)
+5. **Credential check** — on `main` push only: fails hard if `FLOW_ACCESS_TOKEN`, `FLOW_ORG`, or `FLOW_PROJECT` secrets are absent. Prevents misconfigured secrets from silently removing integration coverage.
+6. **Integration tests** — `cargo test --test integration` with secrets injected. Runs only on push to `main` (PRs from forks cannot access secrets).
 
 Matrix: runs on `ubuntu-latest`. Rust toolchain pinned to stable via `dtolnay/rust-toolchain@stable`.
 
 ### `release.yml` — runs on push of a `v*` tag (e.g. `v1.0.0`)
 
-1. Builds release binaries for three targets:
+Two-phase design — all platforms must succeed before any release is published:
+
+1. **`build` jobs** (parallel matrix): each target builds, strips, and archives its binary, then uploads it as a GitHub Actions artifact. Three targets:
    - `x86_64-unknown-linux-gnu` (runs on `ubuntu-latest`)
    - `aarch64-apple-darwin` (runs on `macos-latest`)
    - `x86_64-pc-windows-msvc` (runs on `windows-latest`)
-2. Each target runs in its own matrix job on the appropriate native runner — no cross-compilation needed.
-3. Linux/macOS binaries are stripped and archived as `flow-{target}.tar.gz`. The Windows binary is archived as `flow-x86_64-pc-windows-msvc.zip`.
-4. Creates a GitHub Release via `softprops/action-gh-release` and uploads all four archives as release assets.
+2. **`publish` job** (single, `needs: build`): downloads all three artifacts and creates the GitHub Release in one step. If any build job fails, the publish job never runs and no partial release is created.
 
 The release workflow requires a `GITHUB_TOKEN` (automatically provided by Actions) — no additional secrets needed for publishing.
 

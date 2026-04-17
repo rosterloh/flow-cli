@@ -12,13 +12,119 @@
 
 ---
 
-### Task 1: Add `src/output.rs`
+### Task 1: Add `src/lib.rs` to expose a library target
+
+Integration tests in `tests/` import crate internals via `flow_cli::...`. This requires a library target alongside the binary. Without `src/lib.rs`, `cargo test --test unit` will fail to compile because the test binary cannot import from a bin-only crate.
+
+**Files:**
+- Create: `src/lib.rs`
+- Modify: `src/main.rs` (remove `mod` declarations, use the lib crate instead)
+
+- [ ] **Step 1: Create `src/lib.rs`**
+
+```rust
+// src/lib.rs
+pub mod cli;
+pub mod client;
+pub mod config;
+pub mod handlers;
+pub mod output;
+```
+
+- [ ] **Step 2: Update `src/main.rs` to use the library crate**
+
+Replace the module declarations at the top of `src/main.rs` with imports from the lib crate. The binary and library are separate compilation units; the binary accesses the library via `flow_cli::`:
+
+```rust
+// src/main.rs
+use anyhow::Result;
+use clap::Parser;
+
+use flow_cli::cli::{Cli, Commands};
+use flow_cli::client::FlowClient;
+use flow_cli::config::{Config, config_path};
+use flow_cli::handlers;
+use flow_cli::output::OutputFormat;
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let cli = Cli::parse();
+    let output = cli.output;
+    let config_path = config_path()?;
+    let mut config = Config::load(&config_path)?;
+
+    match cli.command {
+        Commands::Auth { command } => {
+            flow_cli::handlers::handle_auth(command, &mut config, &config_path).await?
+        }
+        Commands::Config { command } => {
+            flow_cli::handlers::handle_config(command, &mut config, &config_path)?
+        }
+        Commands::Orgs { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_orgs(command, &client, output).await?;
+        }
+        Commands::Projects { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_projects(command, &client, &config, output).await?;
+        }
+        Commands::Requirements { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_requirements(command, &client, &config, output).await?;
+        }
+        Commands::Systems { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_systems(command, &client, &config, output).await?;
+        }
+        Commands::TestCases { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_test_cases(command, &client, &config, output).await?;
+        }
+        Commands::TestPlans { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_test_plans(command, &client, &config, output).await?;
+        }
+        Commands::Values { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_values(command, &client, &config, output).await?;
+        }
+        Commands::Util { command } => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_util(command, &client, output).await?;
+        }
+        Commands::Raw(command) => {
+            let client = FlowClient::from_config(&config)?;
+            handlers::handle_raw(command, &client, output).await?;
+        }
+    }
+
+    Ok(())
+}
+```
+
+- [ ] **Step 3: Run `cargo build` — expect success**
+
+```bash
+cargo build 2>&1
+```
+
+Expected: `Finished` — both the `flow-cli` lib and `flow` bin targets compile.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add src/lib.rs src/main.rs
+git commit -m "feat: add library target so integration tests can import crate internals"
+```
+
+---
+
+### Task 2: Add `src/output.rs`
 
 **Files:**
 - Create: `src/output.rs`
-- Create: `tests/unit/mod.rs`
+- Create: `tests/unit.rs`        ← test binary entry point (NOT tests/unit/mod.rs)
 - Create: `tests/unit/output.rs`
-- Modify: `src/main.rs` (add `mod output;`)
 
 - [ ] **Step 1: Create `tests/unit/output.rs` with failing tests**
 
@@ -64,10 +170,10 @@ fn table_mode_does_not_panic_on_scalar() {
 }
 ```
 
-- [ ] **Step 2: Create `tests/unit/mod.rs`**
+- [ ] **Step 2: Create `tests/unit.rs`** — this is the entry point for the `unit` test binary (`cargo test --test unit`). Rust finds `tests/unit/output.rs` as a submodule of this file.
 
 ```rust
-// tests/unit/mod.rs
+// tests/unit.rs
 mod output;
 ```
 
@@ -179,15 +285,13 @@ fn value_to_cell(v: &Value) -> String {
 }
 ```
 
-- [ ] **Step 5: Add `mod output;` to `src/main.rs`** (add after the existing `mod config;` line)
+- [ ] **Step 5: Add `pub mod output;` to `src/lib.rs`** — it was declared in Task 1 already; confirm it is present:
 
-```rust
-mod cli;
-mod client;
-mod config;
-mod handlers;
-mod output;
+```bash
+grep "pub mod output" src/lib.rs
 ```
+
+Expected: one match. If missing, add it.
 
 - [ ] **Step 6: Run tests — expect all 6 to pass**
 
@@ -200,18 +304,18 @@ Expected: `test output::... ok` × 6.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/output.rs src/main.rs tests/unit/mod.rs tests/unit/output.rs
+git add src/output.rs tests/unit.rs tests/unit/output.rs
 git commit -m "feat: add output module with JSON and table formatting"
 ```
 
 ---
 
-### Task 2: Add `HttpSend` trait to `src/client.rs` and `MockHttpClient` helper
+### Task 3: Add `HttpSend` trait to `src/client.rs` and `MockHttpClient` helper
 
 **Files:**
 - Modify: `src/client.rs`
 - Create: `tests/unit/helpers.rs`
-- Modify: `tests/unit/mod.rs`
+- Modify: `tests/unit.rs`
 
 - [ ] **Step 1: Replace the `send` method on `FlowClient` with a public trait in `src/client.rs`**
 
@@ -419,10 +523,10 @@ impl HttpSend for MockHttpClient {
 }
 ```
 
-- [ ] **Step 4: Update `tests/unit/mod.rs` to declare the helpers module**
+- [ ] **Step 4: Update `tests/unit.rs` to declare the helpers module**
 
 ```rust
-// tests/unit/mod.rs
+// tests/unit.rs
 pub mod helpers;
 mod output;
 ```
@@ -438,24 +542,27 @@ Expected: all 6 output tests pass.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/client.rs tests/unit/helpers.rs tests/unit/mod.rs
+git add src/client.rs tests/unit/helpers.rs tests/unit.rs
 git commit -m "feat: add HttpSend trait and MockHttpClient test helper"
 ```
 
 ---
 
-### Task 3: Integration test harness
+### Task 4: Integration test harness
 
 **Files:**
-- Create: `tests/integration/mod.rs`
+- Create: `tests/integration.rs`   ← test binary entry point (NOT tests/integration/mod.rs)
 
-- [ ] **Step 1: Create `tests/integration/mod.rs`**
+- [ ] **Step 1: Create `tests/integration.rs`**
+
+`require_credentials()` returns `None` for local dev (graceful skip). On CI for `main` pushes, the workflow separately validates credentials are present before this binary runs — see Plan 4 for the CI step that hard-fails when secrets are absent.
 
 ```rust
-// tests/integration/mod.rs
+// tests/integration.rs
 
 /// Returns `(token, org, project)` from env vars, or `None` if any are absent.
-/// Call this at the top of every integration test and `return` if it returns `None`.
+/// In local dev: call this at the top of every test and `return` early if None.
+/// On CI: the workflow validates credentials before running this binary.
 ///
 /// Example:
 /// ```
@@ -480,13 +587,13 @@ Expected: `running 0 tests` — no failures.
 - [ ] **Step 3: Commit**
 
 ```bash
-git add tests/integration/mod.rs
+git add tests/integration.rs
 git commit -m "chore: add integration test harness with credential guard"
 ```
 
 ---
 
-### Task 4: Split `cli.rs` into `src/cli/` module
+### Task 5: Split `cli.rs` into `src/cli/` module
 
 **Files:**
 - Create: `src/cli/mod.rs`
@@ -980,7 +1087,7 @@ git commit -m "refactor: split cli.rs into per-resource modules under src/cli/"
 
 ---
 
-### Task 5: Split `handlers.rs` into `src/handlers/` module
+### Task 6: Split `handlers.rs` into `src/handlers/` module
 
 **Files:**
 - Create: `src/handlers/mod.rs`
@@ -1752,13 +1859,13 @@ git commit -m "refactor: split handlers.rs into per-resource modules under src/h
 
 ---
 
-### Task 6: Add `--output` flag to `src/main.rs`
+### Task 7: Add `--output` flag to `src/main.rs`
 
 **Files:**
 - Modify: `src/main.rs`
 - Modify: `src/cli/mod.rs` (add `--output` field to `Cli`)
 - Create: `tests/unit/orgs.rs`
-- Modify: `tests/unit/mod.rs`
+- Modify: `tests/unit.rs`
 
 - [ ] **Step 1: Write a failing unit test for `handle_orgs`**
 
@@ -1786,10 +1893,10 @@ async fn orgs_list_calls_get_on_orgs_path() {
 }
 ```
 
-- [ ] **Step 2: Add `mod orgs;` to `tests/unit/mod.rs`**
+- [ ] **Step 2: Add `mod orgs;` to `tests/unit.rs`**
 
 ```rust
-// tests/unit/mod.rs
+// tests/unit.rs
 pub mod helpers;
 mod orgs;
 mod output;
@@ -1917,7 +2024,7 @@ Expected: clean build, all tests pass.
 - [ ] **Step 8: Commit**
 
 ```bash
-git add src/main.rs src/cli/mod.rs tests/unit/mod.rs tests/unit/orgs.rs
+git add src/main.rs src/cli/mod.rs tests/unit.rs tests/unit/orgs.rs
 git commit -m "feat: add --output flag (json|table) threaded through all handlers"
 ```
 

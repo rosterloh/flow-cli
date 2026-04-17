@@ -18,9 +18,9 @@
 - Modify: `src/cli/requirements.rs`
 - Modify: `src/handlers/requirements.rs`
 - Create: `tests/unit/requirements.rs`
-- Modify: `tests/unit/mod.rs`
+- Modify: `tests/unit.rs`
 - Create: `tests/integration/requirements.rs`
-- Modify: `tests/integration/mod.rs`
+- Modify: `tests/integration.rs`
 
 - [ ] **Step 1: Write failing unit tests in `tests/unit/requirements.rs`**
 
@@ -163,10 +163,10 @@ async fn get_custom_fields_calls_get_on_custom_fields_path() {
 }
 ```
 
-- [ ] **Step 2: Add `mod requirements;` to `tests/unit/mod.rs`**
+- [ ] **Step 2: Add `mod requirements;` to `tests/unit.rs`**
 
 ```rust
-// tests/unit/mod.rs
+// tests/unit.rs
 pub mod helpers;
 mod orgs;
 mod output;
@@ -597,10 +597,10 @@ async fn requirements_create_and_delete_roundtrip() {
 }
 ```
 
-- [ ] **Step 9: Add `mod requirements;` to `tests/integration/mod.rs`**
+- [ ] **Step 9: Add `mod requirements;` to `tests/integration.rs`**
 
 ```rust
-// tests/integration/mod.rs
+// tests/integration.rs
 mod requirements;
 
 pub fn require_credentials() -> Option<(String, String, String)> {
@@ -623,8 +623,8 @@ Expected: all unit tests pass. Integration tests skip if env vars absent.
 
 ```bash
 git add src/cli/requirements.rs src/handlers/requirements.rs \
-        tests/unit/requirements.rs tests/unit/mod.rs \
-        tests/integration/requirements.rs tests/integration/mod.rs
+        tests/unit/requirements.rs tests/unit.rs \
+        tests/integration/requirements.rs tests/integration.rs
 git commit -m "feat: add all missing requirements endpoints"
 ```
 
@@ -636,9 +636,9 @@ git commit -m "feat: add all missing requirements endpoints"
 - Modify: `src/cli/systems.rs`
 - Modify: `src/handlers/systems.rs`
 - Create: `tests/unit/systems.rs`
-- Modify: `tests/unit/mod.rs`
+- Modify: `tests/unit.rs`
 - Create: `tests/integration/systems.rs`
-- Modify: `tests/integration/mod.rs`
+- Modify: `tests/integration.rs`
 
 - [ ] **Step 1: Write failing unit tests in `tests/unit/systems.rs`**
 
@@ -718,10 +718,10 @@ async fn unlink_test_case_calls_delete_on_correct_path() {
 }
 ```
 
-- [ ] **Step 2: Add `mod systems;` to `tests/unit/mod.rs`**
+- [ ] **Step 2: Add `mod systems;` to `tests/unit.rs`**
 
 ```rust
-// tests/unit/mod.rs
+// tests/unit.rs
 pub mod helpers;
 mod orgs;
 mod output;
@@ -1031,10 +1031,10 @@ async fn systems_list_succeeds() {
 }
 ```
 
-- [ ] **Step 7: Add `mod systems;` to `tests/integration/mod.rs`**
+- [ ] **Step 7: Add `mod systems;` to `tests/integration.rs`**
 
 ```rust
-// tests/integration/mod.rs
+// tests/integration.rs
 mod requirements;
 mod systems;
 
@@ -1056,8 +1056,8 @@ cargo test --test unit
 
 ```bash
 git add src/cli/systems.rs src/handlers/systems.rs \
-        tests/unit/systems.rs tests/unit/mod.rs \
-        tests/integration/systems.rs tests/integration/mod.rs
+        tests/unit/systems.rs tests/unit.rs \
+        tests/integration/systems.rs tests/integration.rs
 git commit -m "feat: add all missing systems endpoints"
 ```
 
@@ -1069,9 +1069,9 @@ git commit -m "feat: add all missing systems endpoints"
 - Modify: `src/cli/test_cases.rs`
 - Modify: `src/handlers/test_cases.rs`
 - Create: `tests/unit/test_cases.rs`
-- Modify: `tests/unit/mod.rs`
+- Modify: `tests/unit.rs`
 - Create: `tests/integration/test_cases.rs`
-- Modify: `tests/integration/mod.rs`
+- Modify: `tests/integration.rs`
 
 - [ ] **Step 1: Write failing unit tests in `tests/unit/test_cases.rs`**
 
@@ -1162,10 +1162,10 @@ async fn list_requirements_calls_correct_path() {
 }
 ```
 
-- [ ] **Step 2: Add `mod test_cases;` to `tests/unit/mod.rs`**
+- [ ] **Step 2: Add `mod test_cases;` to `tests/unit.rs`**
 
 ```rust
-// tests/unit/mod.rs
+// tests/unit.rs
 pub mod helpers;
 mod orgs;
 mod output;
@@ -1435,10 +1435,10 @@ async fn test_cases_list_succeeds() {
 }
 ```
 
-- [ ] **Step 7: Add `mod test_cases;` to `tests/integration/mod.rs`**
+- [ ] **Step 7: Add `mod test_cases;` to `tests/integration.rs`**
 
 ```rust
-// tests/integration/mod.rs
+// tests/integration.rs
 mod requirements;
 mod systems;
 mod test_cases;
@@ -1461,8 +1461,8 @@ cargo test --test unit
 
 ```bash
 git add src/cli/test_cases.rs src/handlers/test_cases.rs \
-        tests/unit/test_cases.rs tests/unit/mod.rs \
-        tests/integration/test_cases.rs tests/integration/mod.rs
+        tests/unit/test_cases.rs tests/unit.rs \
+        tests/integration/test_cases.rs tests/integration.rs
 git commit -m "feat: add all missing test-cases endpoints"
 ```
 
@@ -1475,9 +1475,9 @@ git commit -m "feat: add all missing test-cases endpoints"
 - Modify: `src/handlers/test_plans.rs`
 - Modify: `src/cli/mod.rs` (add TestPlans to Commands)
 - Create: `tests/unit/test_plans.rs`
-- Modify: `tests/unit/mod.rs`
+- Modify: `tests/unit.rs`
 - Create: `tests/integration/test_plans.rs`
-- Modify: `tests/integration/mod.rs`
+- Modify: `tests/integration.rs`
 
 - [ ] **Step 1: Write failing unit tests in `tests/unit/test_plans.rs`**
 
@@ -1568,10 +1568,10 @@ async fn link_test_case_calls_put_on_link_path() {
 }
 ```
 
-- [ ] **Step 2: Add `mod test_plans;` to `tests/unit/mod.rs`**
+- [ ] **Step 2: Add `mod test_plans;` to `tests/unit.rs`**
 
 ```rust
-// tests/unit/mod.rs
+// tests/unit.rs
 pub mod helpers;
 mod orgs;
 mod output;
@@ -1740,10 +1740,10 @@ async fn test_plans_list_succeeds() {
 }
 ```
 
-- [ ] **Step 7: Add `mod test_plans;` to `tests/integration/mod.rs`**
+- [ ] **Step 7: Add `mod test_plans;` to `tests/integration.rs`**
 
 ```rust
-// tests/integration/mod.rs
+// tests/integration.rs
 mod requirements;
 mod systems;
 mod test_cases;
@@ -1767,8 +1767,8 @@ cargo test --test unit
 
 ```bash
 git add src/cli/test_plans.rs src/handlers/test_plans.rs \
-        tests/unit/test_plans.rs tests/unit/mod.rs \
-        tests/integration/test_plans.rs tests/integration/mod.rs
+        tests/unit/test_plans.rs tests/unit.rs \
+        tests/integration/test_plans.rs tests/integration.rs
 git commit -m "feat: add missing test-plans CRUD and new endpoints"
 ```
 
@@ -1780,9 +1780,9 @@ git commit -m "feat: add missing test-plans CRUD and new endpoints"
 - Modify: `src/cli/values.rs`
 - Modify: `src/handlers/values.rs`
 - Create: `tests/unit/values.rs`
-- Modify: `tests/unit/mod.rs`
+- Modify: `tests/unit.rs`
 - Create: `tests/integration/values.rs`
-- Modify: `tests/integration/mod.rs`
+- Modify: `tests/integration.rs`
 
 - [ ] **Step 1: Write failing unit tests in `tests/unit/values.rs`**
 
@@ -1830,10 +1830,10 @@ async fn set_import_id_calls_put_on_importid_path() {
 }
 ```
 
-- [ ] **Step 2: Add `mod values;` to `tests/unit/mod.rs`**
+- [ ] **Step 2: Add `mod values;` to `tests/unit.rs`**
 
 ```rust
-// tests/unit/mod.rs
+// tests/unit.rs
 pub mod helpers;
 mod orgs;
 mod output;
@@ -1983,10 +1983,10 @@ async fn values_list_succeeds() {
 }
 ```
 
-- [ ] **Step 7: Add `mod values;` to `tests/integration/mod.rs`**
+- [ ] **Step 7: Add `mod values;` to `tests/integration.rs`**
 
 ```rust
-// tests/integration/mod.rs
+// tests/integration.rs
 mod requirements;
 mod systems;
 mod test_cases;
@@ -2013,8 +2013,8 @@ Expected: all unit tests pass. Integration tests skip without credentials.
 
 ```bash
 git add src/cli/values.rs src/handlers/values.rs \
-        tests/unit/values.rs tests/unit/mod.rs \
-        tests/integration/values.rs tests/integration/mod.rs
+        tests/unit/values.rs tests/unit.rs \
+        tests/integration/values.rs tests/integration.rs
 git commit -m "feat: add values get and set-import-id endpoints"
 ```
 

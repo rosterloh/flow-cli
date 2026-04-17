@@ -73,8 +73,20 @@ jobs:
       - name: Unit tests
         run: cargo test --test unit
 
+      - name: Verify integration credentials present
+        # Hard-fail on main if secrets are not configured — silent skips hide coverage gaps.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          FLOW_ACCESS_TOKEN: ${{ secrets.FLOW_ACCESS_TOKEN }}
+          FLOW_ORG: ${{ secrets.FLOW_ORG }}
+          FLOW_PROJECT: ${{ secrets.FLOW_PROJECT }}
+        run: |
+          if [ -z "$FLOW_ACCESS_TOKEN" ] || [ -z "$FLOW_ORG" ] || [ -z "$FLOW_PROJECT" ]; then
+            echo "::error::Integration test secrets (FLOW_ACCESS_TOKEN, FLOW_ORG, FLOW_PROJECT) must be configured for CI on main. Add them as repository secrets."
+            exit 1
+          fi
+
       - name: Integration tests
-        # Only runs on push to main; PRs from forks cannot access secrets.
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           FLOW_ACCESS_TOKEN: ${{ secrets.FLOW_ACCESS_TOKEN }}
@@ -107,6 +119,8 @@ git commit -m "ci: add GitHub Actions CI workflow"
 
 - [ ] **Step 1: Create `.github/workflows/release.yml`**
 
+Two-phase design: `build` jobs run in parallel (one per target) and upload binary archives as GitHub Actions artifacts only. The `publish` job waits for all `build` jobs to succeed before creating the GitHub Release and attaching all three archives. If any platform fails to build, no release is created.
+
 ```yaml
 # .github/workflows/release.yml
 name: Release
@@ -123,10 +137,9 @@ jobs:
   build:
     name: Build ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
-    permissions:
-      contents: write
 
     strategy:
+      fail-fast: true
       matrix:
         include:
           - target: x86_64-unknown-linux-gnu
@@ -179,10 +192,29 @@ jobs:
           Compress-Archive -Path "target\${{ matrix.target }}\release\flow.exe" -DestinationPath $archive
           echo "ASSET=$archive" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Upload release asset
+      - name: Upload artifact for publish job
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: ${{ env.ASSET }}
+
+  publish:
+    name: Publish GitHub Release
+    needs: build        # all three build jobs must pass before this runs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release and upload assets
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ env.ASSET }}
+          files: artifacts/**/*
           generate_release_notes: true
 ```
 
