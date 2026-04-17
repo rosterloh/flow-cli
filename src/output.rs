@@ -62,7 +62,11 @@ fn print_array_table(items: &[Value]) {
         .collect::<Vec<_>>()
         .join("  ");
     println!("{header_row}");
-    let sep: String = widths.iter().map(|w| "-".repeat(*w)).collect::<Vec<_>>().join("  ");
+    let sep: String = widths
+        .iter()
+        .map(|w| "-".repeat(*w))
+        .collect::<Vec<_>>()
+        .join("  ");
     println!("{sep}");
     for row in &rows {
         let line: String = row

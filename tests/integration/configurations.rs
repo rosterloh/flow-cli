@@ -1,6 +1,6 @@
 // tests/integration/configurations.rs
-use flow_cli::cli::configurations::ConfigurationCommands;
 use flow_cli::cli::ResourceContextArgs;
+use flow_cli::cli::configurations::ConfigurationCommands;
 use flow_cli::client::FlowClient;
 use flow_cli::config::Config;
 use flow_cli::handlers::handle_configurations;
@@ -17,16 +17,25 @@ fn make_config(token: &str, org: &str, project: &str) -> Config {
 }
 
 fn ctx(org: &str, project: &str) -> ResourceContextArgs {
-    ResourceContextArgs { org: Some(org.into()), project: Some(project.into()) }
+    ResourceContextArgs {
+        org: Some(org.into()),
+        project: Some(project.into()),
+    }
 }
 
 #[tokio::test]
 async fn configurations_list_returns_without_error() {
-    let Some((token, org, project)) = require_credentials() else { return };
+    let Some((token, org, project)) = require_credentials() else {
+        return;
+    };
     let config = make_config(&token, &org, &project);
     let client = FlowClient::from_config(&config).unwrap();
     handle_configurations(
         ConfigurationCommands::List(ctx(&org, &project)),
-        &client, &config, OutputFormat::Json,
-    ).await.unwrap();
+        &client,
+        &config,
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
 }

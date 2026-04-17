@@ -19,7 +19,11 @@ pub async fn handle_values<C: HttpSend>(
     match command {
         ValueCommands::List(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let suffix = if args.numeric { "values/number" } else { "values" };
+            let suffix = if args.numeric {
+                "values/number"
+            } else {
+                "values"
+            };
             let path = format!("/org/{org}/project/{project}/{suffix}");
             let response = client.send(Method::GET, &path, &[], None, true).await?;
             print_output(&response, output)?;
@@ -34,7 +38,13 @@ pub async fn handle_values<C: HttpSend>(
             let (org, project) = resolve_context(&args.context, config)?;
             let path = format!("/org/{org}/project/{project}/value/{}/number", args.id);
             let response = client
-                .send(Method::PUT, &path, &[], Some(json!({ "value": args.value })), true)
+                .send(
+                    Method::PUT,
+                    &path,
+                    &[],
+                    Some(json!({ "value": args.value })),
+                    true,
+                )
                 .await?;
             print_output(&response, output)?;
         }
@@ -42,7 +52,9 @@ pub async fn handle_values<C: HttpSend>(
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/values/importid");
-            let response = client.send(Method::PUT, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::PUT, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
     }

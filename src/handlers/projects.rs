@@ -27,7 +27,13 @@ pub async fn handle_projects<C: HttpSend>(
             let org = resolve_org(&args.org, config)?;
             let path = format!("/org/{org}/projects");
             let response = client
-                .send(Method::POST, &path, &[], Some(json!({ "name": args.name })), true)
+                .send(
+                    Method::POST,
+                    &path,
+                    &[],
+                    Some(json!({ "name": args.name })),
+                    true,
+                )
                 .await?;
             print_output(&response, output)?;
         }

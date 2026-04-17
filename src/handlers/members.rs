@@ -26,7 +26,9 @@ pub async fn handle_members<C: HttpSend>(
             let org = resolve_org(&args.org, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/members");
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         MemberCommands::RemoveOrg(args) => {
@@ -45,7 +47,9 @@ pub async fn handle_members<C: HttpSend>(
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/members");
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         MemberCommands::RemoveProject(args) => {

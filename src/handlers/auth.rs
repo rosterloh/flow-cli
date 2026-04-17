@@ -89,14 +89,17 @@ pub async fn handle_auth(
                 } else {
                     "none"
                 };
-            print_output(&json!({
-                "auth": auth,
-                "baseUrl": config.effective_base_url(),
-                "org": config.effective_org(),
-                "project": config.effective_project(),
-                "configPath": config_path.display().to_string(),
-                "savedRefreshToken": config.refresh_token.is_some(),
-            }), OutputFormat::Json)?;
+            print_output(
+                &json!({
+                    "auth": auth,
+                    "baseUrl": config.effective_base_url(),
+                    "org": config.effective_org(),
+                    "project": config.effective_project(),
+                    "configPath": config_path.display().to_string(),
+                    "savedRefreshToken": config.refresh_token.is_some(),
+                }),
+                OutputFormat::Json,
+            )?;
         }
         AuthCommands::Clear { all } => {
             config.access_token = None;
@@ -106,10 +109,13 @@ pub async fn handle_auth(
                 config.refresh_token = None;
             }
             config.save(config_path)?;
-            print_output(&json!({
-                "cleared": "auth",
-                "refreshTokenCleared": all,
-            }), OutputFormat::Json)?;
+            print_output(
+                &json!({
+                    "cleared": "auth",
+                    "refreshTokenCleared": all,
+                }),
+                OutputFormat::Json,
+            )?;
         }
     }
     Ok(())

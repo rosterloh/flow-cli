@@ -1,11 +1,11 @@
 // src/handlers/configurations.rs
-use anyhow::Result;
-use reqwest::Method;
+use super::{load_json_payload, resolve_context};
 use crate::cli::configurations::ConfigurationCommands;
 use crate::client::HttpSend;
 use crate::config::Config;
 use crate::output::{OutputFormat, print_output};
-use super::{load_json_payload, resolve_context};
+use anyhow::Result;
+use reqwest::Method;
 
 pub async fn handle_configurations<C: HttpSend>(
     command: ConfigurationCommands,
@@ -24,7 +24,9 @@ pub async fn handle_configurations<C: HttpSend>(
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/configurations");
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
     }

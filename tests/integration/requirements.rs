@@ -17,19 +17,33 @@ fn make_config(token: &str, org: &str, project: &str) -> Config {
 }
 
 fn ctx(org: &str, project: &str) -> ResourceContextArgs {
-    ResourceContextArgs { org: Some(org.into()), project: Some(project.into()) }
+    ResourceContextArgs {
+        org: Some(org.into()),
+        project: Some(project.into()),
+    }
 }
 
 #[tokio::test]
 async fn requirements_list_returns_without_error() {
-    let Some((token, org, project)) = require_credentials() else { return };
+    let Some((token, org, project)) = require_credentials() else {
+        return;
+    };
     let config = make_config(&token, &org, &project);
     let client = FlowClient::from_config(&config).unwrap();
     handle_requirements(
         RequirementCommands::List(ListRequirementsArgs {
-            list: ListArgs { context: ctx(&org, &project), paged: true, after: None, limit: Some(5) },
+            list: ListArgs {
+                context: ctx(&org, &project),
+                paged: true,
+                after: None,
+                limit: Some(5),
+            },
             scope: None,
         }),
-        &client, &config, OutputFormat::Json,
-    ).await.unwrap();
+        &client,
+        &config,
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
 }

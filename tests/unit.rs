@@ -1,9 +1,9 @@
 // tests/unit.rs
-pub mod helpers;
 #[path = "unit/configurations.rs"]
 mod configurations;
 #[path = "unit/documents.rs"]
 mod documents;
+pub mod helpers;
 #[path = "unit/interfaces.rs"]
 mod interfaces;
 #[path = "unit/members.rs"]

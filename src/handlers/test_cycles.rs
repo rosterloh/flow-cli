@@ -1,11 +1,11 @@
 // src/handlers/test_cycles.rs
-use anyhow::Result;
-use reqwest::Method;
+use super::resolve_context;
 use crate::cli::test_cycles::TestCycleCommands;
 use crate::client::HttpSend;
 use crate::config::Config;
 use crate::output::{OutputFormat, print_output};
-use super::resolve_context;
+use anyhow::Result;
+use reqwest::Method;
 
 pub async fn handle_test_cycles<C: HttpSend>(
     command: TestCycleCommands,

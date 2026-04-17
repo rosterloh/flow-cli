@@ -37,13 +37,16 @@ pub async fn handle_test_cases<C: HttpSend>(
             let (org, project) = resolve_context(&args.context, config)?;
             let body = named_items_body(args.names, args.description);
             let path = format!("/org/{org}/project/{project}/testCases");
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         TestCaseCommands::Patch(args) => {
             patch_collection(client, config, args, output, |org, project| {
                 format!("/org/{org}/project/{project}/testCases")
-            }).await?;
+            })
+            .await?;
         }
         TestCaseCommands::Delete(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
@@ -55,36 +58,53 @@ pub async fn handle_test_cases<C: HttpSend>(
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/testCase/{}/steps", args.id);
-            let response = client.send(Method::PUT, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::PUT, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         TestCaseCommands::SetImportId(args) => {
             patch_collection(client, config, args, output, |org, project| {
                 format!("/org/{org}/project/{project}/testCases/importid")
-            }).await?;
+            })
+            .await?;
         }
         TestCaseCommands::UploadFile(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let path = format!("/org/{org}/project/{project}/testCase/{}/file/{}", args.id, args.file_id);
+            let path = format!(
+                "/org/{org}/project/{project}/testCase/{}/file/{}",
+                args.id, args.file_id
+            );
             let response = client.send(Method::POST, &path, &[], None, true).await?;
             print_output(&response, output)?;
         }
         TestCaseCommands::LinkJira(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
-            let path = format!("/org/{org}/project/{project}/testCase/{}/jiraIssues", args.id);
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let path = format!(
+                "/org/{org}/project/{project}/testCase/{}/jiraIssues",
+                args.id
+            );
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         TestCaseCommands::UnlinkJira(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let path = format!("/org/{org}/project/{project}/testCase/{}/jiraIssues/{}", args.id, args.jira_issue_id);
+            let path = format!(
+                "/org/{org}/project/{project}/testCase/{}/jiraIssues/{}",
+                args.id, args.jira_issue_id
+            );
             let response = client.send(Method::DELETE, &path, &[], None, true).await?;
             print_output(&response, output)?;
         }
         TestCaseCommands::ListRequirements(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let path = format!("/org/{org}/project/{project}/testCase/{}/links/requirements", args.id);
+            let path = format!(
+                "/org/{org}/project/{project}/testCase/{}/links/requirements",
+                args.id
+            );
             let response = client.send(Method::GET, &path, &[], None, true).await?;
             print_output(&response, output)?;
         }
@@ -97,41 +117,52 @@ pub async fn handle_test_cases<C: HttpSend>(
         TestCaseCommands::PatchCustomFields(args) => {
             patch_collection(client, config, args, output, |org, project| {
                 format!("/org/{org}/project/{project}/testCases/customFields")
-            }).await?;
+            })
+            .await?;
         }
         TestCaseCommands::RenameCustomFieldOption(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/testCases/customFields/renameOption");
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         TestCaseCommands::AddConfiguration(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/testCases/configuration");
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         TestCaseCommands::RemoveConfiguration(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/testCases/configuration");
-            let response = client.send(Method::DELETE, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::DELETE, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         TestCaseCommands::SetStages(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/testCaseStages");
-            let response = client.send(Method::PUT, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::PUT, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         TestCaseCommands::CreateTestRun(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/testCase/{}/testRun", args.id);
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
     }

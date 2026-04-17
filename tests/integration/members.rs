@@ -16,11 +16,17 @@ fn make_config(token: &str, org: &str, _project: &str) -> Config {
 
 #[tokio::test]
 async fn members_list_org_returns_without_error() {
-    let Some((token, org, project)) = require_credentials() else { return };
+    let Some((token, org, project)) = require_credentials() else {
+        return;
+    };
     let config = make_config(&token, &org, &project);
     let client = FlowClient::from_config(&config).unwrap();
     handle_members(
         MemberCommands::ListOrg(OrgMemberArgs { org: Some(org) }),
-        &client, &config, OutputFormat::Json,
-    ).await.unwrap();
+        &client,
+        &config,
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
 }

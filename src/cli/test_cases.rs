@@ -1,7 +1,9 @@
 // src/cli/test_cases.rs
 use clap::{Args, Subcommand};
 
-use super::{CreateNamedItemsArgs, JsonPayloadArgs, ListArgs, PatchCollectionArgs, ResourceContextArgs};
+use super::{
+    CreateNamedItemsArgs, JsonPayloadArgs, ListArgs, PatchCollectionArgs, ResourceContextArgs,
+};
 
 #[derive(Subcommand, Debug)]
 pub enum TestCaseCommands {

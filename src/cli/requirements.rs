@@ -1,7 +1,10 @@
 // src/cli/requirements.rs
 use clap::{Args, Subcommand, ValueEnum};
 
-use super::{CreateNamedItemsArgs, ItemArgs, JsonPayloadArgs, ListArgs, PatchCollectionArgs, ResourceContextArgs};
+use super::{
+    CreateNamedItemsArgs, ItemArgs, JsonPayloadArgs, ListArgs, PatchCollectionArgs,
+    ResourceContextArgs,
+};
 
 #[derive(Subcommand, Debug)]
 pub enum RequirementCommands {

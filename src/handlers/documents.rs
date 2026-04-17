@@ -32,14 +32,18 @@ pub async fn handle_documents<C: HttpSend>(
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/documents");
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         DocumentCommands::Patch(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/documents");
-            let response = client.send(Method::PATCH, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::PATCH, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         DocumentCommands::Delete(args) => {
@@ -52,7 +56,9 @@ pub async fn handle_documents<C: HttpSend>(
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/documents/importid");
-            let response = client.send(Method::PUT, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::PUT, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
     }

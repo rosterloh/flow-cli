@@ -26,7 +26,9 @@ pub async fn handle_test_plans<C: HttpSend>(
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/testPlans");
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         TestPlanCommands::Get(args) => {
@@ -38,7 +40,8 @@ pub async fn handle_test_plans<C: HttpSend>(
         TestPlanCommands::Patch(args) => {
             patch_collection(client, config, args, output, |org, project| {
                 format!("/org/{org}/project/{project}/testPlans")
-            }).await?;
+            })
+            .await?;
         }
         TestPlanCommands::Delete(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
@@ -49,29 +52,40 @@ pub async fn handle_test_plans<C: HttpSend>(
         TestPlanCommands::CreateCycle(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
-            let path = format!("/org/{org}/project/{project}/testPlan/{}/testCycle", args.id);
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let path = format!(
+                "/org/{org}/project/{project}/testPlan/{}/testCycle",
+                args.id
+            );
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         TestPlanCommands::SetImportId(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/testPlans/importid");
-            let response = client.send(Method::PUT, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::PUT, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         TestPlanCommands::LinkTestCase(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/link/testPlanTestCase");
-            let response = client.send(Method::PUT, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::PUT, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         TestPlanCommands::LinkTestCaseCrossProject(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/link/testPlanTestCase/crossProject");
-            let response = client.send(Method::PUT, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::PUT, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
     }

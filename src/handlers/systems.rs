@@ -24,14 +24,20 @@ pub async fn handle_systems<C: HttpSend>(
             let query = list_query(&args.list.after, args.list.limit);
             let response = client.send(Method::GET, &path, &query, None, true).await?;
             if args.top_level {
-                let systems = response.get("results").and_then(|v| v.as_array()).cloned().unwrap_or_default();
+                let systems = response
+                    .get("results")
+                    .and_then(|v| v.as_array())
+                    .cloned()
+                    .unwrap_or_default();
                 let top: Vec<Value> = systems
                     .into_iter()
                     .filter(|s| s.get("parentId").is_none())
-                    .map(|s| json!({
-                        "id": s["id"],
-                        "name": s["name"],
-                    }))
+                    .map(|s| {
+                        json!({
+                            "id": s["id"],
+                            "name": s["name"],
+                        })
+                    })
                     .collect();
                 print_output(&Value::Array(top), output)?;
             } else {
@@ -41,12 +47,22 @@ pub async fn handle_systems<C: HttpSend>(
         SystemCommands::Create(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let mut body = json!({ "name": args.name });
-            if let Some(d) = args.description { body["description"] = Value::String(d); }
-            if let Some(o) = args.owner { body["owner"] = Value::String(o); }
-            if let Some(p) = args.parent_id { body["parentId"] = Value::String(p); }
-            if let Some(p) = args.prefix { body["prefix"] = Value::String(p); }
+            if let Some(d) = args.description {
+                body["description"] = Value::String(d);
+            }
+            if let Some(o) = args.owner {
+                body["owner"] = Value::String(o);
+            }
+            if let Some(p) = args.parent_id {
+                body["parentId"] = Value::String(p);
+            }
+            if let Some(p) = args.prefix {
+                body["prefix"] = Value::String(p);
+            }
             let path = format!("/org/{org}/project/{project}/system");
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         SystemCommands::Update(args) => {
@@ -55,15 +71,27 @@ pub async fn handle_systems<C: HttpSend>(
                 load_json_payload(&args.payload)?
             } else {
                 let mut body = json!({});
-                if let Some(n) = args.name { body["name"] = Value::String(n); }
-                if let Some(d) = args.description { body["description"] = Value::String(d); }
-                if let Some(o) = args.owner { body["owner"] = Value::String(o); }
-                if let Some(p) = args.parent_id { body["parentId"] = Value::String(p); }
-                if let Some(p) = args.prefix { body["prefix"] = Value::String(p); }
+                if let Some(n) = args.name {
+                    body["name"] = Value::String(n);
+                }
+                if let Some(d) = args.description {
+                    body["description"] = Value::String(d);
+                }
+                if let Some(o) = args.owner {
+                    body["owner"] = Value::String(o);
+                }
+                if let Some(p) = args.parent_id {
+                    body["parentId"] = Value::String(p);
+                }
+                if let Some(p) = args.prefix {
+                    body["prefix"] = Value::String(p);
+                }
                 body
             };
             let path = format!("/org/{org}/project/{project}/system/{}", args.id);
-            let response = client.send(Method::PUT, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::PUT, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         SystemCommands::Delete(args) => {
@@ -76,78 +104,120 @@ pub async fn handle_systems<C: HttpSend>(
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/systems");
-            let response = client.send(Method::PUT, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::PUT, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         SystemCommands::ListDocuments(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let path = format!("/org/{org}/project/{project}/system/{}/links/documents", args.id);
+            let path = format!(
+                "/org/{org}/project/{project}/system/{}/links/documents",
+                args.id
+            );
             let response = client.send(Method::GET, &path, &[], None, true).await?;
             print_output(&response, output)?;
         }
         SystemCommands::LinkDocument(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
-            let path = format!("/org/{org}/project/{project}/system/{}/links/documents", args.id);
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let path = format!(
+                "/org/{org}/project/{project}/system/{}/links/documents",
+                args.id
+            );
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         SystemCommands::ListRequirements(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let path = format!("/org/{org}/project/{project}/system/{}/links/requirements", args.id);
+            let path = format!(
+                "/org/{org}/project/{project}/system/{}/links/requirements",
+                args.id
+            );
             let response = client.send(Method::GET, &path, &[], None, true).await?;
             print_output(&response, output)?;
         }
         SystemCommands::LinkRequirement(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
-            let path = format!("/org/{org}/project/{project}/system/{}/links/requirements", args.id);
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let path = format!(
+                "/org/{org}/project/{project}/system/{}/links/requirements",
+                args.id
+            );
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         SystemCommands::UnlinkRequirement(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let path = format!("/org/{org}/project/{project}/system/{}/links/requirement/{}", args.id, args.requirement_id);
+            let path = format!(
+                "/org/{org}/project/{project}/system/{}/links/requirement/{}",
+                args.id, args.requirement_id
+            );
             let response = client.send(Method::DELETE, &path, &[], None, true).await?;
             print_output(&response, output)?;
         }
         SystemCommands::ListTestCases(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let path = format!("/org/{org}/project/{project}/system/{}/links/testCases", args.id);
+            let path = format!(
+                "/org/{org}/project/{project}/system/{}/links/testCases",
+                args.id
+            );
             let response = client.send(Method::GET, &path, &[], None, true).await?;
             print_output(&response, output)?;
         }
         SystemCommands::LinkTestCase(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
-            let path = format!("/org/{org}/project/{project}/system/{}/links/testCases", args.id);
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let path = format!(
+                "/org/{org}/project/{project}/system/{}/links/testCases",
+                args.id
+            );
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         SystemCommands::UnlinkTestCase(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let path = format!("/org/{org}/project/{project}/system/{}/links/testCase/{}", args.id, args.test_case_id);
+            let path = format!(
+                "/org/{org}/project/{project}/system/{}/links/testCase/{}",
+                args.id, args.test_case_id
+            );
             let response = client.send(Method::DELETE, &path, &[], None, true).await?;
             print_output(&response, output)?;
         }
         SystemCommands::ListTestPlans(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let path = format!("/org/{org}/project/{project}/system/{}/links/testPlans", args.id);
+            let path = format!(
+                "/org/{org}/project/{project}/system/{}/links/testPlans",
+                args.id
+            );
             let response = client.send(Method::GET, &path, &[], None, true).await?;
             print_output(&response, output)?;
         }
         SystemCommands::LinkTestPlan(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
-            let path = format!("/org/{org}/project/{project}/system/{}/links/testPlans", args.id);
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let path = format!(
+                "/org/{org}/project/{project}/system/{}/links/testPlans",
+                args.id
+            );
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         SystemCommands::RenameCustomFieldOption(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/systems/customFields/renameOption");
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
     }

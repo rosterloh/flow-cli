@@ -1,6 +1,6 @@
 // src/cli/configurations.rs
-use clap::Subcommand;
 use super::{PatchCollectionArgs, ResourceContextArgs};
+use clap::Subcommand;
 
 #[derive(Subcommand, Debug)]
 pub enum ConfigurationCommands {

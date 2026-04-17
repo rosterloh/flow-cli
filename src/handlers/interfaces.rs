@@ -26,14 +26,18 @@ pub async fn handle_interfaces<C: HttpSend>(
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/interfaces");
-            let response = client.send(Method::POST, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::POST, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         InterfaceCommands::Patch(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
             let body = load_json_payload(&args.payload)?;
             let path = format!("/org/{org}/project/{project}/interfaces");
-            let response = client.send(Method::PATCH, &path, &[], Some(body), true).await?;
+            let response = client
+                .send(Method::PATCH, &path, &[], Some(body), true)
+                .await?;
             print_output(&response, output)?;
         }
         InterfaceCommands::Delete(args) => {

@@ -17,7 +17,10 @@ pub async fn handle_util<C: HttpSend>(
     match command {
         UtilCommands::ConvertHtml(args) => {
             let body = Value::Array(
-                args.html.into_iter().map(|html| json!({ "html": html })).collect(),
+                args.html
+                    .into_iter()
+                    .map(|html| json!({ "html": html }))
+                    .collect(),
             );
             let response = client
                 .send(Method::POST, "/util/convert-html", &[], Some(body), true)
@@ -40,7 +43,13 @@ pub async fn handle_raw<C: HttpSend>(
         .collect::<Result<Vec<_>>>()?;
     let body = load_optional_json_payload(&command.payload)?;
     let response = client
-        .send(command.method.as_method(), &command.path, &query, body, true)
+        .send(
+            command.method.as_method(),
+            &command.path,
+            &query,
+            body,
+            true,
+        )
         .await?;
     print_output(&response, output)?;
     Ok(())

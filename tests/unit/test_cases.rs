@@ -10,7 +10,10 @@ use flow_cli::output::OutputFormat;
 use crate::helpers::MockHttpClient;
 
 fn ctx(org: &str, project: &str) -> ResourceContextArgs {
-    ResourceContextArgs { org: Some(org.into()), project: Some(project.into()) }
+    ResourceContextArgs {
+        org: Some(org.into()),
+        project: Some(project.into()),
+    }
 }
 
 #[tokio::test]
@@ -18,11 +21,19 @@ async fn set_steps_calls_put_on_steps_path() {
     let mock = MockHttpClient::with_response(json!({}));
     handle_test_cases(
         TestCaseCommands::SetSteps(TestCaseItemPayloadArgs {
-            context: ctx("o", "p"), id: 7,
-            payload: JsonPayloadArgs { json: Some("[]".into()), body_file: None },
+            context: ctx("o", "p"),
+            id: 7,
+            payload: JsonPayloadArgs {
+                json: Some("[]".into()),
+                body_file: None,
+            },
         }),
-        &mock, &Config::default(), OutputFormat::Json,
-    ).await.unwrap();
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
     let call = &mock.calls()[0];
     assert_eq!(call.method, "PUT");
     assert_eq!(call.path, "/org/o/project/p/testCase/7/steps");
@@ -34,10 +45,17 @@ async fn set_import_id_calls_patch_on_importid_path() {
     handle_test_cases(
         TestCaseCommands::SetImportId(PatchCollectionArgs {
             context: ctx("o", "p"),
-            payload: JsonPayloadArgs { json: Some("{}".into()), body_file: None },
+            payload: JsonPayloadArgs {
+                json: Some("{}".into()),
+                body_file: None,
+            },
         }),
-        &mock, &Config::default(), OutputFormat::Json,
-    ).await.unwrap();
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
     assert_eq!(mock.calls()[0].path, "/org/o/project/p/testCases/importid");
 }
 
@@ -46,11 +64,19 @@ async fn create_test_run_calls_post_on_test_run_path() {
     let mock = MockHttpClient::with_response(json!({"id": 1}));
     handle_test_cases(
         TestCaseCommands::CreateTestRun(TestCaseItemPayloadArgs {
-            context: ctx("o", "p"), id: 5,
-            payload: JsonPayloadArgs { json: Some("{}".into()), body_file: None },
+            context: ctx("o", "p"),
+            id: 5,
+            payload: JsonPayloadArgs {
+                json: Some("{}".into()),
+                body_file: None,
+            },
         }),
-        &mock, &Config::default(), OutputFormat::Json,
-    ).await.unwrap();
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
     let call = &mock.calls()[0];
     assert_eq!(call.method, "POST");
     assert_eq!(call.path, "/org/o/project/p/testCase/5/testRun");
@@ -61,8 +87,12 @@ async fn get_custom_fields_calls_get_on_custom_fields_path() {
     let mock = MockHttpClient::with_response(json!([]));
     handle_test_cases(
         TestCaseCommands::GetCustomFields(ctx("o", "p")),
-        &mock, &Config::default(), OutputFormat::Json,
-    ).await.unwrap();
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
     let call = &mock.calls()[0];
     assert_eq!(call.method, "GET");
     assert_eq!(call.path, "/org/o/project/p/testCases/customFields");
@@ -72,8 +102,18 @@ async fn get_custom_fields_calls_get_on_custom_fields_path() {
 async fn list_requirements_calls_correct_path() {
     let mock = MockHttpClient::with_response(json!([]));
     handle_test_cases(
-        TestCaseCommands::ListRequirements(TestCaseItemArgs { context: ctx("o", "p"), id: 3 }),
-        &mock, &Config::default(), OutputFormat::Json,
-    ).await.unwrap();
-    assert_eq!(mock.calls()[0].path, "/org/o/project/p/testCase/3/links/requirements");
+        TestCaseCommands::ListRequirements(TestCaseItemArgs {
+            context: ctx("o", "p"),
+            id: 3,
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    assert_eq!(
+        mock.calls()[0].path,
+        "/org/o/project/p/testCase/3/links/requirements"
+    );
 }

@@ -23,8 +23,8 @@ pub mod test_cases;
 pub mod test_cycles;
 pub mod test_plans;
 pub mod test_runs;
-pub mod values;
 pub mod util;
+pub mod values;
 
 pub use auth::handle_auth;
 pub use config::handle_config;
@@ -40,10 +40,13 @@ pub use test_cases::handle_test_cases;
 pub use test_cycles::handle_test_cycles;
 pub use test_plans::handle_test_plans;
 pub use test_runs::handle_test_runs;
-pub use values::handle_values;
 pub use util::{handle_raw, handle_util};
+pub use values::handle_values;
 
-pub(crate) fn resolve_context(args: &ResourceContextArgs, config: &Config) -> Result<(String, String)> {
+pub(crate) fn resolve_context(
+    args: &ResourceContextArgs,
+    config: &Config,
+) -> Result<(String, String)> {
     let org = resolve_org(&args.org, config)?;
     let project = args
         .project
@@ -56,13 +59,21 @@ pub(crate) fn resolve_context(args: &ResourceContextArgs, config: &Config) -> Re
 pub(crate) fn resolve_org(org: &Option<String>, config: &Config) -> Result<String> {
     org.clone()
         .or_else(|| config.effective_org())
-        .ok_or_else(|| anyhow!("no org configured; pass --org or set one with `flow config set-context --org ...`"))
+        .ok_or_else(|| {
+            anyhow!(
+                "no org configured; pass --org or set one with `flow config set-context --org ...`"
+            )
+        })
 }
 
 pub(crate) fn list_query(after: &Option<String>, limit: Option<u32>) -> Vec<(String, String)> {
     let mut query = Vec::new();
-    if let Some(after) = after { query.push(("after".to_string(), after.clone())); }
-    if let Some(limit) = limit { query.push(("limit".to_string(), limit.to_string())); }
+    if let Some(after) = after {
+        query.push(("after".to_string(), after.clone()));
+    }
+    if let Some(limit) = limit {
+        query.push(("limit".to_string(), limit.to_string()));
+    }
     query
 }
 
@@ -96,17 +107,33 @@ pub(crate) fn parse_query_pair(input: &str) -> Result<(String, String)> {
 }
 
 pub(crate) fn redact(value: &str) -> String {
-    let suffix = value.chars().rev().take(4).collect::<String>().chars().rev().collect::<String>();
-    if value.len() <= 4 { "****".to_string() } else { format!("***{suffix}") }
+    let suffix = value
+        .chars()
+        .rev()
+        .take(4)
+        .collect::<String>()
+        .chars()
+        .rev()
+        .collect::<String>();
+    if value.len() <= 4 {
+        "****".to_string()
+    } else {
+        format!("***{suffix}")
+    }
 }
 
 pub(crate) fn named_items_body(names: Vec<String>, description: Option<String>) -> Value {
     Value::Array(
-        names.into_iter().map(|name| {
-            let mut item = json!({ "name": name });
-            if let Some(description) = &description { item["description"] = Value::String(description.clone()); }
-            item
-        }).collect(),
+        names
+            .into_iter()
+            .map(|name| {
+                let mut item = json!({ "name": name });
+                if let Some(description) = &description {
+                    item["description"] = Value::String(description.clone());
+                }
+                item
+            })
+            .collect(),
     )
 }
 
