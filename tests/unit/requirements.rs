@@ -6,7 +6,8 @@ use flow_cli::cli::requirements::{
     RequirementPatchArgs, RequirementScope,
 };
 use flow_cli::cli::{
-    ItemArgs, JsonPayloadArgs, ListArgs, PatchCollectionArgs, ResourceContextArgs,
+    ItemArgs, JsonPayloadArgs, ListArgs, PatchCollectionArgs,
+    RequirementLinkTestCaseCrossProjectArgs, ResourceContextArgs,
 };
 use flow_cli::config::Config;
 use flow_cli::handlers::handle_requirements;
@@ -348,5 +349,56 @@ async fn link_test_case_json_mode_still_works() {
     assert_eq!(
         call.body.as_ref().unwrap(),
         &json!({"links":[{"requirementId":1,"testCaseId":2}]})
+    );
+}
+
+#[tokio::test]
+async fn link_test_case_cross_project_calls_cross_project_path() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_requirements(
+        RequirementCommands::LinkTestCaseCrossProject(RequirementLinkTestCaseCrossProjectArgs {
+            context: ctx("o", "p"),
+            payload: JsonPayloadArgs {
+                json: Some(r#"{"links":[]}"#.into()),
+                body_file: None,
+            },
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(call.method, "PUT");
+    assert_eq!(
+        call.path,
+        "/org/o/project/p/link/requirementTestCase/crossProject"
+    );
+}
+
+#[tokio::test]
+async fn patch_json_mode_still_works() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_requirements(
+        RequirementCommands::Patch(RequirementPatchArgs {
+            context: ctx("o", "p"),
+            id: None,
+            name: None,
+            owner: None,
+            payload: JsonPayloadArgs {
+                json: Some(r#"[{"requirementId": 1, "name": "x"}]"#.into()),
+                body_file: None,
+            },
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    assert_eq!(
+        mock.calls()[0].body.as_ref().unwrap(),
+        &json!([{ "requirementId": 1, "name": "x" }])
     );
 }
