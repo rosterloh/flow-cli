@@ -2,6 +2,7 @@
 use serde_json::{Value, json};
 
 use flow_cli::handlers::build_patch_single;
+use flow_cli::handlers::build_links_wrapper;
 
 #[test]
 fn build_patch_single_wraps_id_and_fields_in_array() {
@@ -20,4 +21,20 @@ fn build_patch_single_wraps_id_and_fields_in_array() {
 fn build_patch_single_skips_no_fields() {
     let body: Value = build_patch_single("testCaseId", json!(326), vec![]);
     assert_eq!(body, json!([{ "testCaseId": 326 }]));
+}
+
+#[test]
+fn build_links_wrapper_wraps_single_link_in_links_array() {
+    let link = json!({ "requirementId": 2855, "testCaseId": 326 });
+    let body = build_links_wrapper(vec![link]);
+    assert_eq!(
+        body,
+        json!({ "links": [{ "requirementId": 2855, "testCaseId": 326 }] })
+    );
+}
+
+#[test]
+fn build_links_wrapper_accepts_empty_links() {
+    let body = build_links_wrapper(vec![]);
+    assert_eq!(body, json!({ "links": [] }));
 }

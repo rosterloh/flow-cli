@@ -154,6 +154,13 @@ pub fn build_patch_single(
     Value::Array(vec![Value::Object(obj)])
 }
 
+/// Wrap links into `{"links": [...]}` — used by the two cross-resource
+/// link endpoints (`link/requirementTestCase`, `link/testPlanTestCase`).
+#[doc(hidden)]
+pub fn build_links_wrapper(links: Vec<Value>) -> Value {
+    json!({ "links": links })
+}
+
 pub(crate) async fn patch_collection<C, F>(
     client: &C,
     config: &Config,
