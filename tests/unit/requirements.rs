@@ -2,7 +2,8 @@
 use serde_json::json;
 
 use flow_cli::cli::requirements::{
-    ListRequirementsArgs, RequirementCommands, RequirementJiraArgs, RequirementScope,
+    ListRequirementsArgs, RequirementCommands, RequirementJiraArgs, RequirementPatchArgs,
+    RequirementScope,
 };
 use flow_cli::cli::{
     ItemArgs, JsonPayloadArgs, ListArgs, PatchCollectionArgs, ResourceContextArgs,
@@ -211,4 +212,71 @@ async fn get_custom_fields_calls_get() {
     let call = &mock.calls()[0];
     assert_eq!(call.method, "GET");
     assert_eq!(call.path, "/org/o/project/p/requirements/customFields");
+}
+
+#[tokio::test]
+async fn patch_flag_mode_builds_single_item_array() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_requirements(
+        RequirementCommands::Patch(RequirementPatchArgs {
+            context: ctx("o", "p"),
+            id: Some(2855),
+            name: None,
+            owner: Some("rio@skl.vc".into()),
+            payload: JsonPayloadArgs::default(),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(call.method, "PATCH");
+    assert_eq!(call.path, "/org/o/project/p/requirements");
+    assert_eq!(
+        call.body.as_ref().unwrap(),
+        &json!([{ "requirementId": 2855, "owner": "rio@skl.vc" }])
+    );
+}
+
+#[tokio::test]
+async fn patch_flag_mode_without_field_flags_errors() {
+    let mock = MockHttpClient::with_response(json!({}));
+    let err = handle_requirements(
+        RequirementCommands::Patch(RequirementPatchArgs {
+            context: ctx("o", "p"),
+            id: Some(2855),
+            name: None,
+            owner: None,
+            payload: JsonPayloadArgs::default(),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap_err();
+    assert!(err.to_string().contains("at least one field flag"));
+}
+
+#[tokio::test]
+async fn patch_flag_mode_without_id_errors() {
+    let mock = MockHttpClient::with_response(json!({}));
+    let err = handle_requirements(
+        RequirementCommands::Patch(RequirementPatchArgs {
+            context: ctx("o", "p"),
+            id: None,
+            name: Some("orphaned".into()),
+            owner: None,
+            payload: JsonPayloadArgs::default(),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap_err();
+    assert!(err.to_string().contains("--id is required"));
+    assert!(mock.calls().is_empty());
 }
