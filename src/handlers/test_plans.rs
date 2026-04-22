@@ -8,7 +8,7 @@ use crate::client::HttpSend;
 use crate::config::Config;
 use crate::output::{OutputFormat, print_output};
 
-use super::{build_patch_single, load_json_payload, resolve_context};
+use super::{build_links_wrapper, build_patch_single, load_json_payload, resolve_context};
 
 pub async fn handle_test_plans<C: HttpSend>(
     command: TestPlanCommands,
@@ -93,7 +93,14 @@ pub async fn handle_test_plans<C: HttpSend>(
         }
         TestPlanCommands::LinkTestCase(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let body = load_json_payload(&args.payload)?;
+            let body = match (args.test_plan_id, args.test_case_id) {
+                (Some(pid), Some(tcid)) => {
+                    build_links_wrapper(vec![json!({ "testPlanId": pid, "testCaseId": tcid })])
+                }
+                (Some(_), None) => anyhow::bail!("--test-case-id is required in flag mode"),
+                (None, Some(_)) => anyhow::bail!("--test-plan-id is required in flag mode"),
+                (None, None) => load_json_payload(&args.payload)?,
+            };
             let path = format!("/org/{org}/project/{project}/link/testPlanTestCase");
             let response = client
                 .send(Method::PUT, &path, &[], Some(body), true)

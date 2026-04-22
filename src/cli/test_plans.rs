@@ -12,7 +12,7 @@ pub enum TestPlanCommands {
     Delete(TestPlanItemArgs),
     CreateCycle(TestPlanItemPayloadArgs),
     SetImportId(PatchCollectionArgs),
-    LinkTestCase(PatchCollectionArgs),
+    LinkTestCase(TestPlanLinkTestCaseArgs),
     LinkTestCaseCrossProject(PatchCollectionArgs),
 }
 
@@ -44,6 +44,18 @@ pub struct TestPlanPatchArgs {
     pub name: Option<String>,
     #[arg(long, conflicts_with_all = ["json", "body_file"])]
     pub description: Option<String>,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct TestPlanLinkTestCaseArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub test_plan_id: Option<i64>,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub test_case_id: Option<i64>,
     #[command(flatten)]
     pub payload: JsonPayloadArgs,
 }

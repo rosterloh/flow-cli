@@ -48,7 +48,8 @@ pub use test_cases::{
 };
 pub use test_cycles::{TestCycleCommands, TestCycleItemArgs};
 pub use test_plans::{
-    TestPlanCommands, TestPlanItemArgs, TestPlanItemPayloadArgs, TestPlanPatchArgs,
+    TestPlanCommands, TestPlanItemArgs, TestPlanItemPayloadArgs, TestPlanLinkTestCaseArgs,
+    TestPlanPatchArgs,
 };
 pub use test_runs::{TestRunCommands, TestRunItemArgs, TestRunItemPayloadArgs};
 pub use util::{ConvertHtmlArgs, UtilCommands};
