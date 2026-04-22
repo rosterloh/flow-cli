@@ -133,6 +133,10 @@ pub struct RequirementUnlinkCrossProjectArgs {
 pub struct RequirementLinkTestCaseArgs {
     #[command(flatten)]
     pub context: ResourceContextArgs,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub requirement_id: Option<i64>,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub test_case_id: Option<i64>,
     #[command(flatten)]
     pub payload: JsonPayloadArgs,
 }

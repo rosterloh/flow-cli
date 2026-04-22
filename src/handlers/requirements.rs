@@ -9,8 +9,8 @@ use crate::config::Config;
 use crate::output::{OutputFormat, print_output};
 
 use super::{
-    build_patch_single, list_query, load_json_payload, named_items_body, patch_collection,
-    resolve_context,
+    build_links_wrapper, build_patch_single, list_query, load_json_payload, named_items_body,
+    patch_collection, resolve_context,
 };
 
 pub async fn handle_requirements<C: HttpSend>(
@@ -216,7 +216,14 @@ pub async fn handle_requirements<C: HttpSend>(
         }
         RequirementCommands::LinkTestCase(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let body = load_json_payload(&args.payload)?;
+            let body = match (args.requirement_id, args.test_case_id) {
+                (Some(rid), Some(tcid)) => {
+                    build_links_wrapper(vec![json!({ "requirementId": rid, "testCaseId": tcid })])
+                }
+                (Some(_), None) => anyhow::bail!("--test-case-id is required in flag mode"),
+                (None, Some(_)) => anyhow::bail!("--requirement-id is required in flag mode"),
+                (None, None) => load_json_payload(&args.payload)?,
+            };
             let path = format!("/org/{org}/project/{project}/link/requirementTestCase");
             let response = client
                 .send(Method::PUT, &path, &[], Some(body), true)
