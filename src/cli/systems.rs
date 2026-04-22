@@ -19,7 +19,7 @@ pub enum SystemCommands {
     LinkTestCase(SystemLinkPayloadArgs),
     UnlinkTestCase(SystemUnlinkTestCaseArgs),
     ListTestPlans(SystemItemArgs),
-    LinkTestPlan(SystemLinkPayloadArgs),
+    LinkTestPlan(SystemLinkTestPlanArgs),
     RenameCustomFieldOption(PatchCollectionArgs),
 }
 
@@ -45,6 +45,18 @@ pub struct SystemLinkPayloadArgs {
     pub context: ResourceContextArgs,
     #[arg(long)]
     pub id: String,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct SystemLinkTestPlanArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: String,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub test_plan_id: Option<i64>,
     #[command(flatten)]
     pub payload: JsonPayloadArgs,
 }

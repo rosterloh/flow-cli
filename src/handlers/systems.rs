@@ -8,7 +8,7 @@ use crate::client::HttpSend;
 use crate::config::Config;
 use crate::output::{OutputFormat, print_output};
 
-use super::{list_query, load_json_payload, resolve_context};
+use super::{build_system_link_item, list_query, load_json_payload, resolve_context};
 
 pub async fn handle_systems<C: HttpSend>(
     command: SystemCommands,
@@ -201,7 +201,11 @@ pub async fn handle_systems<C: HttpSend>(
         }
         SystemCommands::LinkTestPlan(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let body = load_json_payload(&args.payload)?;
+            let body = if let Some(test_plan_id) = args.test_plan_id {
+                build_system_link_item("testPlanId", json!(test_plan_id))
+            } else {
+                load_json_payload(&args.payload)?
+            };
             let path = format!(
                 "/org/{org}/project/{project}/system/{}/links/testPlans",
                 args.id

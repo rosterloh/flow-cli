@@ -2,7 +2,7 @@
 use serde_json::json;
 
 use flow_cli::cli::systems::{
-    ListSystemsArgs, SystemCommands, SystemItemArgs, SystemLinkPayloadArgs,
+    ListSystemsArgs, SystemCommands, SystemItemArgs, SystemLinkPayloadArgs, SystemLinkTestPlanArgs,
     SystemUnlinkTestCaseArgs,
 };
 use flow_cli::cli::{JsonPayloadArgs, ListArgs, PatchCollectionArgs, ResourceContextArgs};
@@ -126,4 +126,54 @@ async fn unlink_test_case_calls_delete_on_correct_path() {
     let call = &mock.calls()[0];
     assert_eq!(call.method, "DELETE");
     assert_eq!(call.path, "/org/o/project/p/system/sys-1/links/testCase/99");
+}
+
+#[tokio::test]
+async fn link_test_plan_flag_mode_builds_bare_array() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_systems(
+        SystemCommands::LinkTestPlan(SystemLinkTestPlanArgs {
+            context: ctx("o", "p"),
+            id: "sys-uuid".into(),
+            test_plan_id: Some(203),
+            payload: JsonPayloadArgs::default(),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(call.method, "POST");
+    assert_eq!(
+        call.path,
+        "/org/o/project/p/system/sys-uuid/links/testPlans"
+    );
+    assert_eq!(call.body.as_ref().unwrap(), &json!([{ "testPlanId": 203 }]));
+}
+
+#[tokio::test]
+async fn link_test_plan_json_mode_still_works() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_systems(
+        SystemCommands::LinkTestPlan(SystemLinkTestPlanArgs {
+            context: ctx("o", "p"),
+            id: "sys-uuid".into(),
+            test_plan_id: None,
+            payload: JsonPayloadArgs {
+                json: Some(r#"[{"testPlanId": 9}]"#.into()),
+                body_file: None,
+            },
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    assert_eq!(
+        mock.calls()[0].body.as_ref().unwrap(),
+        &json!([{"testPlanId": 9}])
+    );
 }

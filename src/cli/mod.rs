@@ -40,7 +40,8 @@ pub use requirements::{
 };
 pub use systems::{
     CreateSystemArgs, ListSystemsArgs, SystemCommands, SystemItemArgs, SystemLinkPayloadArgs,
-    SystemUnlinkRequirementArgs, SystemUnlinkTestCaseArgs, UpdateSystemArgs,
+    SystemLinkTestPlanArgs, SystemUnlinkRequirementArgs, SystemUnlinkTestCaseArgs,
+    UpdateSystemArgs,
 };
 pub use test_cases::{
     TestCaseCommands, TestCaseItemArgs, TestCaseItemPayloadArgs, TestCasePatchArgs,
