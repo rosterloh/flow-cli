@@ -171,7 +171,11 @@ pub async fn handle_systems<C: HttpSend>(
         }
         SystemCommands::LinkTestCase(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let body = load_json_payload(&args.payload)?;
+            let body = if let Some(test_case_id) = args.test_case_id {
+                build_system_link_item("testCaseId", json!(test_case_id))
+            } else {
+                load_json_payload(&args.payload)?
+            };
             let path = format!(
                 "/org/{org}/project/{project}/system/{}/links/testCases",
                 args.id

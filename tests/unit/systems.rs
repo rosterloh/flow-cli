@@ -2,8 +2,8 @@
 use serde_json::json;
 
 use flow_cli::cli::systems::{
-    ListSystemsArgs, SystemCommands, SystemItemArgs, SystemLinkPayloadArgs, SystemLinkTestPlanArgs,
-    SystemUnlinkTestCaseArgs,
+    ListSystemsArgs, SystemCommands, SystemItemArgs, SystemLinkPayloadArgs, SystemLinkTestCaseArgs,
+    SystemLinkTestPlanArgs, SystemUnlinkTestCaseArgs,
 };
 use flow_cli::cli::{JsonPayloadArgs, ListArgs, PatchCollectionArgs, ResourceContextArgs};
 use flow_cli::config::Config;
@@ -176,4 +176,29 @@ async fn link_test_plan_json_mode_still_works() {
         mock.calls()[0].body.as_ref().unwrap(),
         &json!([{"testPlanId": 9}])
     );
+}
+
+#[tokio::test]
+async fn link_test_case_flag_mode_builds_bare_array() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_systems(
+        SystemCommands::LinkTestCase(SystemLinkTestCaseArgs {
+            context: ctx("o", "p"),
+            id: "sys-uuid".into(),
+            test_case_id: Some(512),
+            payload: JsonPayloadArgs::default(),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(call.method, "POST");
+    assert_eq!(
+        call.path,
+        "/org/o/project/p/system/sys-uuid/links/testCases"
+    );
+    assert_eq!(call.body.as_ref().unwrap(), &json!([{ "testCaseId": 512 }]));
 }
