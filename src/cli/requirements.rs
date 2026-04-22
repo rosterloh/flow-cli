@@ -28,7 +28,7 @@ pub enum RequirementCommands {
     Unlink(RequirementUnlinkArgs),
     UnlinkCrossProject(RequirementUnlinkCrossProjectArgs),
     LinkTestCase(RequirementLinkTestCaseArgs),
-    LinkTestCaseCrossProject(RequirementLinkTestCaseArgs),
+    LinkTestCaseCrossProject(RequirementLinkTestCaseCrossProjectArgs),
     GetCustomFields(ResourceContextArgs),
     PatchCustomFields(PatchCollectionArgs),
     RenameCustomFieldOption(PatchCollectionArgs),
@@ -137,6 +137,14 @@ pub struct RequirementLinkTestCaseArgs {
     pub requirement_id: Option<i64>,
     #[arg(long, conflicts_with_all = ["json", "body_file"])]
     pub test_case_id: Option<i64>,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct RequirementLinkTestCaseCrossProjectArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
     #[command(flatten)]
     pub payload: JsonPayloadArgs,
 }

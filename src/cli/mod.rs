@@ -34,9 +34,10 @@ pub use orgs::OrgsCommands;
 pub use projects::{CreateProjectArgs, ProjectCommands};
 pub use requirements::{
     ListRequirementsArgs, RequirementCommands, RequirementFileArgs, RequirementImageArgs,
-    RequirementJiraArgs, RequirementLinkArgs, RequirementLinkTestCaseArgs, RequirementPatchArgs,
-    RequirementScope, RequirementSearchArgs, RequirementUnlinkArgs,
-    RequirementUnlinkCrossProjectArgs, RequirementUnlinkJiraArgs,
+    RequirementJiraArgs, RequirementLinkArgs, RequirementLinkTestCaseArgs,
+    RequirementLinkTestCaseCrossProjectArgs, RequirementPatchArgs, RequirementScope,
+    RequirementSearchArgs, RequirementUnlinkArgs, RequirementUnlinkCrossProjectArgs,
+    RequirementUnlinkJiraArgs,
 };
 pub use systems::{
     CreateSystemArgs, ListSystemsArgs, SystemCommands, SystemItemArgs, SystemLinkDocumentArgs,
