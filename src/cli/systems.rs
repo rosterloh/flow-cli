@@ -13,7 +13,7 @@ pub enum SystemCommands {
     ListDocuments(SystemItemArgs),
     LinkDocument(SystemLinkPayloadArgs),
     ListRequirements(SystemItemArgs),
-    LinkRequirement(SystemLinkPayloadArgs),
+    LinkRequirement(SystemLinkRequirementArgs),
     UnlinkRequirement(SystemUnlinkRequirementArgs),
     ListTestCases(SystemItemArgs),
     LinkTestCase(SystemLinkTestCaseArgs),
@@ -45,6 +45,18 @@ pub struct SystemLinkPayloadArgs {
     pub context: ResourceContextArgs,
     #[arg(long)]
     pub id: String,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct SystemLinkRequirementArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: String,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub requirement_id: Option<i64>,
     #[command(flatten)]
     pub payload: JsonPayloadArgs,
 }

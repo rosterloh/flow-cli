@@ -141,7 +141,11 @@ pub async fn handle_systems<C: HttpSend>(
         }
         SystemCommands::LinkRequirement(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let body = load_json_payload(&args.payload)?;
+            let body = if let Some(requirement_id) = args.requirement_id {
+                build_system_link_item("id", json!(requirement_id))
+            } else {
+                load_json_payload(&args.payload)?
+            };
             let path = format!(
                 "/org/{org}/project/{project}/system/{}/links/requirements",
                 args.id
