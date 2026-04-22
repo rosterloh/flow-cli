@@ -8,7 +8,7 @@ pub enum TestPlanCommands {
     List(ResourceContextArgs),
     Create(PatchCollectionArgs),
     Get(TestPlanItemArgs),
-    Patch(PatchCollectionArgs),
+    Patch(TestPlanPatchArgs),
     Delete(TestPlanItemArgs),
     CreateCycle(TestPlanItemPayloadArgs),
     SetImportId(PatchCollectionArgs),
@@ -30,6 +30,20 @@ pub struct TestPlanItemPayloadArgs {
     pub context: ResourceContextArgs,
     #[arg(long)]
     pub id: i64,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct TestPlanPatchArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub id: Option<i64>,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub name: Option<String>,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub description: Option<String>,
     #[command(flatten)]
     pub payload: JsonPayloadArgs,
 }

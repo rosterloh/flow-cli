@@ -47,7 +47,9 @@ pub use test_cases::{
     TestCaseUnlinkJiraArgs, TestCaseUploadFileArgs,
 };
 pub use test_cycles::{TestCycleCommands, TestCycleItemArgs};
-pub use test_plans::{TestPlanCommands, TestPlanItemArgs, TestPlanItemPayloadArgs};
+pub use test_plans::{
+    TestPlanCommands, TestPlanItemArgs, TestPlanItemPayloadArgs, TestPlanPatchArgs,
+};
 pub use test_runs::{TestRunCommands, TestRunItemArgs, TestRunItemPayloadArgs};
 pub use util::{ConvertHtmlArgs, UtilCommands};
 pub use values::{ListValuesArgs, SetNumberValueArgs, ValueCommands, ValueItemArgs};
