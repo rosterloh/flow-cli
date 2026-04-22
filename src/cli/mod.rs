@@ -39,7 +39,7 @@ pub use requirements::{
     RequirementUnlinkCrossProjectArgs, RequirementUnlinkJiraArgs,
 };
 pub use systems::{
-    CreateSystemArgs, ListSystemsArgs, SystemCommands, SystemItemArgs, SystemLinkPayloadArgs,
+    CreateSystemArgs, ListSystemsArgs, SystemCommands, SystemItemArgs, SystemLinkDocumentArgs,
     SystemLinkRequirementArgs, SystemLinkTestCaseArgs, SystemLinkTestPlanArgs,
     SystemUnlinkRequirementArgs, SystemUnlinkTestCaseArgs, UpdateSystemArgs,
 };

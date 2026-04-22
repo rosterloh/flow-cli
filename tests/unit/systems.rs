@@ -2,8 +2,9 @@
 use serde_json::json;
 
 use flow_cli::cli::systems::{
-    ListSystemsArgs, SystemCommands, SystemItemArgs, SystemLinkRequirementArgs,
-    SystemLinkTestCaseArgs, SystemLinkTestPlanArgs, SystemUnlinkTestCaseArgs,
+    ListSystemsArgs, SystemCommands, SystemItemArgs, SystemLinkDocumentArgs,
+    SystemLinkRequirementArgs, SystemLinkTestCaseArgs, SystemLinkTestPlanArgs,
+    SystemUnlinkTestCaseArgs,
 };
 use flow_cli::cli::{JsonPayloadArgs, ListArgs, PatchCollectionArgs, ResourceContextArgs};
 use flow_cli::config::Config;
@@ -227,4 +228,32 @@ async fn link_requirement_flag_mode_uses_id_key() {
         "/org/o/project/p/system/sys-uuid/links/requirements"
     );
     assert_eq!(call.body.as_ref().unwrap(), &json!([{ "id": 2855 }]));
+}
+
+#[tokio::test]
+async fn link_document_flag_mode_builds_bare_array() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_systems(
+        SystemCommands::LinkDocument(SystemLinkDocumentArgs {
+            context: ctx("o", "p"),
+            id: "sys-uuid".into(),
+            document_id: Some("doc-uuid-abc".into()),
+            payload: JsonPayloadArgs::default(),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(call.method, "POST");
+    assert_eq!(
+        call.path,
+        "/org/o/project/p/system/sys-uuid/links/documents"
+    );
+    assert_eq!(
+        call.body.as_ref().unwrap(),
+        &json!([{ "documentId": "doc-uuid-abc" }])
+    );
 }

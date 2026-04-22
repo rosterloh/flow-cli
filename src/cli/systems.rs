@@ -11,7 +11,7 @@ pub enum SystemCommands {
     Delete(SystemItemArgs),
     BulkUpdate(PatchCollectionArgs),
     ListDocuments(SystemItemArgs),
-    LinkDocument(SystemLinkPayloadArgs),
+    LinkDocument(SystemLinkDocumentArgs),
     ListRequirements(SystemItemArgs),
     LinkRequirement(SystemLinkRequirementArgs),
     UnlinkRequirement(SystemUnlinkRequirementArgs),
@@ -40,11 +40,13 @@ pub struct SystemItemArgs {
 }
 
 #[derive(Args, Debug)]
-pub struct SystemLinkPayloadArgs {
+pub struct SystemLinkDocumentArgs {
     #[command(flatten)]
     pub context: ResourceContextArgs,
     #[arg(long)]
     pub id: String,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub document_id: Option<String>,
     #[command(flatten)]
     pub payload: JsonPayloadArgs,
 }

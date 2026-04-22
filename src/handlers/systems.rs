@@ -120,7 +120,11 @@ pub async fn handle_systems<C: HttpSend>(
         }
         SystemCommands::LinkDocument(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let body = load_json_payload(&args.payload)?;
+            let body = if let Some(document_id) = args.document_id {
+                build_system_link_item("documentId", json!(document_id))
+            } else {
+                load_json_payload(&args.payload)?
+            };
             let path = format!(
                 "/org/{org}/project/{project}/system/{}/links/documents",
                 args.id
