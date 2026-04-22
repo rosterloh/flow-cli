@@ -43,8 +43,8 @@ pub use systems::{
     SystemUnlinkRequirementArgs, SystemUnlinkTestCaseArgs, UpdateSystemArgs,
 };
 pub use test_cases::{
-    TestCaseCommands, TestCaseItemArgs, TestCaseItemPayloadArgs, TestCaseUnlinkJiraArgs,
-    TestCaseUploadFileArgs,
+    TestCaseCommands, TestCaseItemArgs, TestCaseItemPayloadArgs, TestCasePatchArgs,
+    TestCaseUnlinkJiraArgs, TestCaseUploadFileArgs,
 };
 pub use test_cycles::{TestCycleCommands, TestCycleItemArgs};
 pub use test_plans::{TestPlanCommands, TestPlanItemArgs, TestPlanItemPayloadArgs};

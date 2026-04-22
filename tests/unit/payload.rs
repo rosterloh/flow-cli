@@ -1,8 +1,8 @@
 // tests/unit/payload.rs
 use serde_json::{Value, json};
 
-use flow_cli::handlers::build_patch_single;
 use flow_cli::handlers::build_links_wrapper;
+use flow_cli::handlers::build_patch_single;
 use flow_cli::handlers::build_system_link_item;
 
 #[test]
