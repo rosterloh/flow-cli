@@ -143,6 +143,33 @@ flow <command> --help
 flow <command> <subcommand> --help
 ```
 
+### Flag-mode shortcuts
+
+For single-item mutations, common fields are available as flags — no need to hand-craft the server's JSON payload.
+
+```bash
+# Patch
+flow test-cases patch --id 326 --owner rio@skl.vc
+flow test-plans patch --id 202 --name "Internal Network Performance Test"
+flow requirements patch --id 2855 --owner rio@skl.vc
+
+# Set steps from a plain step array (caseStepIds generated server-side)
+flow test-cases set-steps --id 326 --steps-file steps.json
+#   where steps.json = [{"action": "...", "expected": "..."}, ...]
+
+# Cross-resource links
+flow requirements link-test-case --requirement-id 2855 --test-case-id 326
+flow test-plans    link-test-case --test-plan-id 203    --test-case-id 329
+
+# System links (the system uses --id; the partner uses --<entity>-id)
+flow systems link-test-plan    --id <sys-uuid> --test-plan-id 203
+flow systems link-test-case    --id <sys-uuid> --test-case-id 326
+flow systems link-requirement  --id <sys-uuid> --requirement-id 2855
+flow systems link-document     --id <sys-uuid> --document-id  <doc-uuid>
+```
+
+`--json` / `--body-file` continue to work unchanged for batch or custom-field payloads.
+
 ## Requirements
 
 ```bash
