@@ -87,7 +87,19 @@ pub async fn handle_test_cases<C: HttpSend>(
         }
         TestCaseCommands::SetSteps(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let body = load_json_payload(&args.payload)?;
+            let body = if let Some(path) = &args.steps_file {
+                let contents = std::fs::read_to_string(path)
+                    .map_err(|err| anyhow::anyhow!("failed to read {}: {err}", path.display()))?;
+                let steps: serde_json::Value = serde_json::from_str(&contents).map_err(|err| {
+                    anyhow::anyhow!("{} is not valid JSON: {err}", path.display())
+                })?;
+                if !steps.is_array() {
+                    anyhow::bail!("{} must contain a JSON array of steps", path.display());
+                }
+                json!([{ "testCaseId": args.id, "steps": steps }])
+            } else {
+                load_json_payload(&args.payload)?
+            };
             let path = format!("/org/{org}/project/{project}/testCase/{}/steps", args.id);
             let response = client
                 .send(Method::PUT, &path, &[], Some(body), true)

@@ -12,7 +12,7 @@ pub enum TestCaseCommands {
     Create(CreateNamedItemsArgs),
     Patch(TestCasePatchArgs),
     Delete(TestCaseItemArgs),
-    SetSteps(TestCaseItemPayloadArgs),
+    SetSteps(TestCaseSetStepsArgs),
     SetImportId(PatchCollectionArgs),
     UploadFile(TestCaseUploadFileArgs),
     LinkJira(TestCaseItemPayloadArgs),
@@ -41,6 +41,18 @@ pub struct TestCaseItemPayloadArgs {
     pub context: ResourceContextArgs,
     #[arg(long)]
     pub id: i64,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct TestCaseSetStepsArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: i64,
+    #[arg(long, value_name = "PATH", conflicts_with_all = ["json", "body_file"])]
+    pub steps_file: Option<std::path::PathBuf>,
     #[command(flatten)]
     pub payload: JsonPayloadArgs,
 }

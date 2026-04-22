@@ -44,7 +44,7 @@ pub use systems::{
 };
 pub use test_cases::{
     TestCaseCommands, TestCaseItemArgs, TestCaseItemPayloadArgs, TestCasePatchArgs,
-    TestCaseUnlinkJiraArgs, TestCaseUploadFileArgs,
+    TestCaseSetStepsArgs, TestCaseUnlinkJiraArgs, TestCaseUploadFileArgs,
 };
 pub use test_cycles::{TestCycleCommands, TestCycleItemArgs};
 pub use test_plans::{
