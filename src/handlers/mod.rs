@@ -137,6 +137,35 @@ pub(crate) fn named_items_body(names: Vec<String>, description: Option<String>) 
     )
 }
 
+/// Build a single-item patch payload: `[{<idKey>: <idValue>, ...fields}]`.
+/// Used by `{resource} patch` commands where the server expects an array
+/// of patch objects with the id nested inside.
+#[doc(hidden)]
+pub fn build_patch_single(id_key: &str, id_value: Value, fields: Vec<(String, Value)>) -> Value {
+    let mut obj = serde_json::Map::new();
+    obj.insert(id_key.to_string(), id_value);
+    for (k, v) in fields {
+        obj.insert(k, v);
+    }
+    Value::Array(vec![Value::Object(obj)])
+}
+
+/// Wrap links into `{"links": [...]}` — used by the two cross-resource
+/// link endpoints (`link/requirementTestCase`, `link/testPlanTestCase`).
+#[doc(hidden)]
+pub fn build_links_wrapper(links: Vec<Value>) -> Value {
+    json!({ "links": links })
+}
+
+/// Build a single-item system-link payload: `[{<entityKey>: <entityValue>}]`.
+/// Used by `systems link-*` commands where the server expects a bare array.
+#[doc(hidden)]
+pub fn build_system_link_item(entity_key: &str, entity_value: Value) -> Value {
+    let mut obj = serde_json::Map::new();
+    obj.insert(entity_key.to_string(), entity_value);
+    Value::Array(vec![Value::Object(obj)])
+}
+
 pub(crate) async fn patch_collection<C, F>(
     client: &C,
     config: &Config,

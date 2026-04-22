@@ -11,6 +11,8 @@ mod members;
 #[path = "unit/orgs.rs"]
 mod orgs;
 mod output;
+#[path = "unit/payload.rs"]
+mod payload;
 #[path = "unit/requirements.rs"]
 mod requirements;
 #[path = "unit/systems.rs"]

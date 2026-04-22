@@ -2,7 +2,8 @@
 use serde_json::json;
 
 use flow_cli::cli::systems::{
-    ListSystemsArgs, SystemCommands, SystemItemArgs, SystemLinkPayloadArgs,
+    ListSystemsArgs, SystemCommands, SystemItemArgs, SystemLinkDocumentArgs,
+    SystemLinkRequirementArgs, SystemLinkTestCaseArgs, SystemLinkTestPlanArgs,
     SystemUnlinkTestCaseArgs,
 };
 use flow_cli::cli::{JsonPayloadArgs, ListArgs, PatchCollectionArgs, ResourceContextArgs};
@@ -86,9 +87,10 @@ async fn list_documents_calls_get_on_links_documents_path() {
 async fn link_requirement_calls_post_on_links_requirements_path() {
     let mock = MockHttpClient::with_response(json!({}));
     handle_systems(
-        SystemCommands::LinkRequirement(SystemLinkPayloadArgs {
+        SystemCommands::LinkRequirement(SystemLinkRequirementArgs {
             context: ctx("o", "p"),
             id: "sys-1".into(),
+            requirement_id: None,
             payload: JsonPayloadArgs {
                 json: Some("{}".into()),
                 body_file: None,
@@ -126,4 +128,132 @@ async fn unlink_test_case_calls_delete_on_correct_path() {
     let call = &mock.calls()[0];
     assert_eq!(call.method, "DELETE");
     assert_eq!(call.path, "/org/o/project/p/system/sys-1/links/testCase/99");
+}
+
+#[tokio::test]
+async fn link_test_plan_flag_mode_builds_bare_array() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_systems(
+        SystemCommands::LinkTestPlan(SystemLinkTestPlanArgs {
+            context: ctx("o", "p"),
+            id: "sys-uuid".into(),
+            test_plan_id: Some(203),
+            payload: JsonPayloadArgs::default(),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(call.method, "POST");
+    assert_eq!(
+        call.path,
+        "/org/o/project/p/system/sys-uuid/links/testPlans"
+    );
+    assert_eq!(call.body.as_ref().unwrap(), &json!([{ "testPlanId": 203 }]));
+}
+
+#[tokio::test]
+async fn link_test_plan_json_mode_still_works() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_systems(
+        SystemCommands::LinkTestPlan(SystemLinkTestPlanArgs {
+            context: ctx("o", "p"),
+            id: "sys-uuid".into(),
+            test_plan_id: None,
+            payload: JsonPayloadArgs {
+                json: Some(r#"[{"testPlanId": 9}]"#.into()),
+                body_file: None,
+            },
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    assert_eq!(
+        mock.calls()[0].body.as_ref().unwrap(),
+        &json!([{"testPlanId": 9}])
+    );
+}
+
+#[tokio::test]
+async fn link_test_case_flag_mode_builds_bare_array() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_systems(
+        SystemCommands::LinkTestCase(SystemLinkTestCaseArgs {
+            context: ctx("o", "p"),
+            id: "sys-uuid".into(),
+            test_case_id: Some(512),
+            payload: JsonPayloadArgs::default(),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(call.method, "POST");
+    assert_eq!(
+        call.path,
+        "/org/o/project/p/system/sys-uuid/links/testCases"
+    );
+    assert_eq!(call.body.as_ref().unwrap(), &json!([{ "testCaseId": 512 }]));
+}
+
+#[tokio::test]
+async fn link_requirement_flag_mode_uses_id_key() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_systems(
+        SystemCommands::LinkRequirement(SystemLinkRequirementArgs {
+            context: ctx("o", "p"),
+            id: "sys-uuid".into(),
+            requirement_id: Some(2855),
+            payload: JsonPayloadArgs::default(),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(call.method, "POST");
+    assert_eq!(
+        call.path,
+        "/org/o/project/p/system/sys-uuid/links/requirements"
+    );
+    assert_eq!(call.body.as_ref().unwrap(), &json!([{ "id": 2855 }]));
+}
+
+#[tokio::test]
+async fn link_document_flag_mode_builds_bare_array() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_systems(
+        SystemCommands::LinkDocument(SystemLinkDocumentArgs {
+            context: ctx("o", "p"),
+            id: "sys-uuid".into(),
+            document_id: Some("doc-uuid-abc".into()),
+            payload: JsonPayloadArgs::default(),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(call.method, "POST");
+    assert_eq!(
+        call.path,
+        "/org/o/project/p/system/sys-uuid/links/documents"
+    );
+    assert_eq!(
+        call.body.as_ref().unwrap(),
+        &json!([{ "documentId": "doc-uuid-abc" }])
+    );
 }

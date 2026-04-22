@@ -12,7 +12,7 @@ pub enum RequirementCommands {
     Search(RequirementSearchArgs),
     Get(ItemArgs),
     Create(CreateNamedItemsArgs),
-    Patch(PatchCollectionArgs),
+    Patch(RequirementPatchArgs),
     Delete(ItemArgs),
     Filter(PatchCollectionArgs),
     SetStage(PatchCollectionArgs),
@@ -28,7 +28,7 @@ pub enum RequirementCommands {
     Unlink(RequirementUnlinkArgs),
     UnlinkCrossProject(RequirementUnlinkCrossProjectArgs),
     LinkTestCase(RequirementLinkTestCaseArgs),
-    LinkTestCaseCrossProject(RequirementLinkTestCaseArgs),
+    LinkTestCaseCrossProject(RequirementLinkTestCaseCrossProjectArgs),
     GetCustomFields(ResourceContextArgs),
     PatchCustomFields(PatchCollectionArgs),
     RenameCustomFieldOption(PatchCollectionArgs),
@@ -133,6 +133,18 @@ pub struct RequirementUnlinkCrossProjectArgs {
 pub struct RequirementLinkTestCaseArgs {
     #[command(flatten)]
     pub context: ResourceContextArgs,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub requirement_id: Option<i64>,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub test_case_id: Option<i64>,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct RequirementLinkTestCaseCrossProjectArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
     #[command(flatten)]
     pub payload: JsonPayloadArgs,
 }
@@ -143,4 +155,18 @@ pub struct RequirementSearchArgs {
     pub context: ResourceContextArgs,
     #[arg(help = "Search term — case-insensitive, matches anywhere in the requirement name")]
     pub term: String,
+}
+
+#[derive(Args, Debug)]
+pub struct RequirementPatchArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub id: Option<i64>,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub name: Option<String>,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub owner: Option<String>,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
 }

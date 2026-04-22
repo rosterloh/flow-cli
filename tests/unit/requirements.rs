@@ -2,10 +2,12 @@
 use serde_json::json;
 
 use flow_cli::cli::requirements::{
-    ListRequirementsArgs, RequirementCommands, RequirementJiraArgs, RequirementScope,
+    ListRequirementsArgs, RequirementCommands, RequirementJiraArgs, RequirementLinkTestCaseArgs,
+    RequirementPatchArgs, RequirementScope,
 };
 use flow_cli::cli::{
-    ItemArgs, JsonPayloadArgs, ListArgs, PatchCollectionArgs, ResourceContextArgs,
+    ItemArgs, JsonPayloadArgs, ListArgs, PatchCollectionArgs,
+    RequirementLinkTestCaseCrossProjectArgs, ResourceContextArgs,
 };
 use flow_cli::config::Config;
 use flow_cli::handlers::handle_requirements;
@@ -211,4 +213,192 @@ async fn get_custom_fields_calls_get() {
     let call = &mock.calls()[0];
     assert_eq!(call.method, "GET");
     assert_eq!(call.path, "/org/o/project/p/requirements/customFields");
+}
+
+#[tokio::test]
+async fn patch_flag_mode_builds_single_item_array() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_requirements(
+        RequirementCommands::Patch(RequirementPatchArgs {
+            context: ctx("o", "p"),
+            id: Some(2855),
+            name: None,
+            owner: Some("rio@skl.vc".into()),
+            payload: JsonPayloadArgs::default(),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(call.method, "PATCH");
+    assert_eq!(call.path, "/org/o/project/p/requirements");
+    assert_eq!(
+        call.body.as_ref().unwrap(),
+        &json!([{ "requirementId": 2855, "owner": "rio@skl.vc" }])
+    );
+}
+
+#[tokio::test]
+async fn patch_flag_mode_without_field_flags_errors() {
+    let mock = MockHttpClient::with_response(json!({}));
+    let err = handle_requirements(
+        RequirementCommands::Patch(RequirementPatchArgs {
+            context: ctx("o", "p"),
+            id: Some(2855),
+            name: None,
+            owner: None,
+            payload: JsonPayloadArgs::default(),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap_err();
+    assert!(err.to_string().contains("at least one field flag"));
+}
+
+#[tokio::test]
+async fn patch_flag_mode_without_id_errors() {
+    let mock = MockHttpClient::with_response(json!({}));
+    let err = handle_requirements(
+        RequirementCommands::Patch(RequirementPatchArgs {
+            context: ctx("o", "p"),
+            id: None,
+            name: Some("orphaned".into()),
+            owner: None,
+            payload: JsonPayloadArgs::default(),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap_err();
+    assert!(err.to_string().contains("--id is required"));
+    assert!(mock.calls().is_empty());
+}
+
+#[tokio::test]
+async fn link_test_case_flag_mode_builds_links_wrapper() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_requirements(
+        RequirementCommands::LinkTestCase(RequirementLinkTestCaseArgs {
+            context: ctx("o", "p"),
+            requirement_id: Some(2855),
+            test_case_id: Some(326),
+            payload: JsonPayloadArgs::default(),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(call.method, "PUT");
+    assert_eq!(call.path, "/org/o/project/p/link/requirementTestCase");
+    assert_eq!(
+        call.body.as_ref().unwrap(),
+        &json!({ "links": [{ "requirementId": 2855, "testCaseId": 326 }] })
+    );
+}
+
+#[tokio::test]
+async fn link_test_case_flag_mode_missing_test_case_id_errors() {
+    let mock = MockHttpClient::with_response(json!({}));
+    let err = handle_requirements(
+        RequirementCommands::LinkTestCase(RequirementLinkTestCaseArgs {
+            context: ctx("o", "p"),
+            requirement_id: Some(2855),
+            test_case_id: None,
+            payload: JsonPayloadArgs::default(),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap_err();
+    assert!(err.to_string().contains("--test-case-id"));
+}
+
+#[tokio::test]
+async fn link_test_case_json_mode_still_works() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_requirements(
+        RequirementCommands::LinkTestCase(RequirementLinkTestCaseArgs {
+            context: ctx("o", "p"),
+            requirement_id: None,
+            test_case_id: None,
+            payload: JsonPayloadArgs {
+                json: Some(r#"{"links":[{"requirementId":1,"testCaseId":2}]}"#.into()),
+                body_file: None,
+            },
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(
+        call.body.as_ref().unwrap(),
+        &json!({"links":[{"requirementId":1,"testCaseId":2}]})
+    );
+}
+
+#[tokio::test]
+async fn link_test_case_cross_project_calls_cross_project_path() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_requirements(
+        RequirementCommands::LinkTestCaseCrossProject(RequirementLinkTestCaseCrossProjectArgs {
+            context: ctx("o", "p"),
+            payload: JsonPayloadArgs {
+                json: Some(r#"{"links":[]}"#.into()),
+                body_file: None,
+            },
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(call.method, "PUT");
+    assert_eq!(
+        call.path,
+        "/org/o/project/p/link/requirementTestCase/crossProject"
+    );
+}
+
+#[tokio::test]
+async fn patch_json_mode_still_works() {
+    let mock = MockHttpClient::with_response(json!({}));
+    handle_requirements(
+        RequirementCommands::Patch(RequirementPatchArgs {
+            context: ctx("o", "p"),
+            id: None,
+            name: None,
+            owner: None,
+            payload: JsonPayloadArgs {
+                json: Some(r#"[{"requirementId": 1, "name": "x"}]"#.into()),
+                body_file: None,
+            },
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    assert_eq!(
+        mock.calls()[0].body.as_ref().unwrap(),
+        &json!([{ "requirementId": 1, "name": "x" }])
+    );
 }

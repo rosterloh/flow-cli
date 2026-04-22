@@ -11,15 +11,15 @@ pub enum SystemCommands {
     Delete(SystemItemArgs),
     BulkUpdate(PatchCollectionArgs),
     ListDocuments(SystemItemArgs),
-    LinkDocument(SystemLinkPayloadArgs),
+    LinkDocument(SystemLinkDocumentArgs),
     ListRequirements(SystemItemArgs),
-    LinkRequirement(SystemLinkPayloadArgs),
+    LinkRequirement(SystemLinkRequirementArgs),
     UnlinkRequirement(SystemUnlinkRequirementArgs),
     ListTestCases(SystemItemArgs),
-    LinkTestCase(SystemLinkPayloadArgs),
+    LinkTestCase(SystemLinkTestCaseArgs),
     UnlinkTestCase(SystemUnlinkTestCaseArgs),
     ListTestPlans(SystemItemArgs),
-    LinkTestPlan(SystemLinkPayloadArgs),
+    LinkTestPlan(SystemLinkTestPlanArgs),
     RenameCustomFieldOption(PatchCollectionArgs),
 }
 
@@ -40,11 +40,49 @@ pub struct SystemItemArgs {
 }
 
 #[derive(Args, Debug)]
-pub struct SystemLinkPayloadArgs {
+pub struct SystemLinkDocumentArgs {
     #[command(flatten)]
     pub context: ResourceContextArgs,
     #[arg(long)]
     pub id: String,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub document_id: Option<String>,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct SystemLinkRequirementArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: String,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub requirement_id: Option<i64>,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct SystemLinkTestCaseArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: String,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub test_case_id: Option<i64>,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct SystemLinkTestPlanArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: String,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub test_plan_id: Option<i64>,
     #[command(flatten)]
     pub payload: JsonPayloadArgs,
 }

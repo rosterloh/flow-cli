@@ -185,17 +185,21 @@ For bulk coverage: iterate over the requirement IDs and flag the empty responses
 
 Payload shapes are **inconsistent** across endpoints. This table reflects what actually works — verified in live calls, not inferred from docs:
 
-| Operation | Endpoint command | Payload shape |
-|---|---|---|
-| Create test case | `test-cases create --name ... --description ...` | (flags, no JSON) |
-| Patch test case | `test-cases patch --json ...` | `[{"testCaseId": N, "owner": "..."}]` |
-| Set test-case steps | `test-cases set-steps --id N --json ...` | `[{"testCaseId": N, "steps": [{"caseStepId": "<uuid>", "action": "...", "expected": "..."}]}]` |
-| Link TC → requirement | `requirements link-test-case --json ...` | `{"links": [{"requirementId": R, "testCaseId": T}]}` |
-| Create test plan | `test-plans create --json ...` | `[{"name": "...", "description": "..."}]` |
-| Patch test plan | `test-plans patch --json ...` | `[{"testPlanId": N, "name": "...", "description": "..."}]` |
-| Link TC → test plan | `test-plans link-test-case --json ...` | `{"links": [{"testPlanId": P, "testCaseId": T}]}` |
-| Link plan → system | `systems link-test-plan --id <uuid> --json ...` | `[{"testPlanId": P}]` |
-| Link TC → system | `systems link-test-case --id <uuid> --json ...` | `[{"testCaseId": T}]` |
+Most commands now accept per-field flags that build the payload for you — see the "Flag mode" column below. The raw-JSON forms remain supported for batch and custom-field payloads.
+
+| Operation | Endpoint command | Flag mode (single item) | Payload shape (batch / custom fields) |
+|---|---|---|---|
+| Create test case | `test-cases create --name ... --description ...` | n/a (flags are native) | — |
+| Patch test case | `test-cases patch` | `--id N --name ... --description ... --owner ...` | `[{"testCaseId": N, "owner": "..."}]` |
+| Set test-case steps | `test-cases set-steps --id N` | `--steps-file path.json` (file is `[{"action","expected"}]`) | `[{"testCaseId": N, "steps": [{"action","expected"}]}]` |
+| Patch test plan | `test-plans patch` | `--id N --name ... --description ...` | `[{"testPlanId": N, "name": "..."}]` |
+| Patch requirement | `requirements patch` | `--id N --name ... --owner ...` | `[{"requirementId": N, "owner": "..."}]` |
+| Link TC → requirement | `requirements link-test-case` | `--requirement-id R --test-case-id T` | `{"links": [{"requirementId": R, "testCaseId": T}]}` |
+| Link TC → test plan | `test-plans link-test-case` | `--test-plan-id P --test-case-id T` | `{"links": [{"testPlanId": P, "testCaseId": T}]}` |
+| Link plan → system | `systems link-test-plan --id <uuid>` | `--test-plan-id P` | `[{"testPlanId": P}]` |
+| Link TC → system | `systems link-test-case --id <uuid>` | `--test-case-id T` | `[{"testCaseId": T}]` |
+| Link req → system | `systems link-requirement --id <uuid>` | `--requirement-id R` | `[{"id": R}]` (`AddRequirementToSystemInput`) |
+| Link doc → system | `systems link-document --id <uuid>` | `--document-id D` | `[{"documentId": "..."}]` |
 
 Common rules:
 - **Mutations take arrays**, even for a single item. A `400 "value must be an array"` error means wrap your payload in `[...]`.
@@ -209,8 +213,10 @@ Common rules:
 
 Creating a properly-owned test case that's linked to requirements is a **4-call** sequence because owner/steps/links aren't part of create. Verified recipe:
 
+This recipe uses the new flag-mode shortcuts. The JSON-mode equivalents still work — see the table above for the exact shapes.
+
 ```python
-import subprocess, json, uuid
+import subprocess, json
 FLOW = "/home/rio/.claude/skills/flow-cli/assets/flow"
 
 def run(cmd):
@@ -224,21 +230,21 @@ out = run([FLOW, "test-cases", "create",
            "--description", "Measure sustained throughput..."])
 tc_id = json.loads(out)[0]["id"]
 
-# 2. Set owner (patch takes array wrapping testCaseId)
+# 2. Set owner (flag mode)
 run([FLOW, "test-cases", "patch",
-     "--json", json.dumps([{"testCaseId": tc_id, "owner": "rio@skl.vc"}])])
+     "--id", str(tc_id),
+     "--owner", "rio@skl.vc"])
 
-# 3. Set steps (each needs a caseStepId UUID)
-steps = [{"caseStepId": str(uuid.uuid4()),
-          "action": "Set up iperf3", "expected": "Link up"},
-         {"caseStepId": str(uuid.uuid4()),
-          "action": "Run saturating test", "expected": ">=10 Gbps"}]
-run([FLOW, "test-cases", "set-steps", "--id", str(tc_id),
-     "--json", json.dumps([{"testCaseId": tc_id, "steps": steps}])])
+# 3. Set steps from a plain array
+#    (write [{"action": ..., "expected": ...}, ...] to /tmp/steps.json first)
+run([FLOW, "test-cases", "set-steps",
+     "--id", str(tc_id),
+     "--steps-file", "/tmp/steps.json"])
 
-# 4. Link to requirements (object-wrapped)
+# 4. Link to a requirement (flag mode)
 run([FLOW, "requirements", "link-test-case",
-     "--json", json.dumps({"links": [{"requirementId": 2855, "testCaseId": tc_id}]})])
+     "--requirement-id", "2855",
+     "--test-case-id", str(tc_id)])
 ```
 
 For batch creation, wrap in `try/except` with a rollback that calls `test-cases delete --id N` on each partial creation.

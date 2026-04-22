@@ -34,20 +34,25 @@ pub use orgs::OrgsCommands;
 pub use projects::{CreateProjectArgs, ProjectCommands};
 pub use requirements::{
     ListRequirementsArgs, RequirementCommands, RequirementFileArgs, RequirementImageArgs,
-    RequirementJiraArgs, RequirementLinkArgs, RequirementLinkTestCaseArgs, RequirementScope,
+    RequirementJiraArgs, RequirementLinkArgs, RequirementLinkTestCaseArgs,
+    RequirementLinkTestCaseCrossProjectArgs, RequirementPatchArgs, RequirementScope,
     RequirementSearchArgs, RequirementUnlinkArgs, RequirementUnlinkCrossProjectArgs,
     RequirementUnlinkJiraArgs,
 };
 pub use systems::{
-    CreateSystemArgs, ListSystemsArgs, SystemCommands, SystemItemArgs, SystemLinkPayloadArgs,
+    CreateSystemArgs, ListSystemsArgs, SystemCommands, SystemItemArgs, SystemLinkDocumentArgs,
+    SystemLinkRequirementArgs, SystemLinkTestCaseArgs, SystemLinkTestPlanArgs,
     SystemUnlinkRequirementArgs, SystemUnlinkTestCaseArgs, UpdateSystemArgs,
 };
 pub use test_cases::{
-    TestCaseCommands, TestCaseItemArgs, TestCaseItemPayloadArgs, TestCaseUnlinkJiraArgs,
-    TestCaseUploadFileArgs,
+    TestCaseCommands, TestCaseItemArgs, TestCaseItemPayloadArgs, TestCasePatchArgs,
+    TestCaseSetStepsArgs, TestCaseUnlinkJiraArgs, TestCaseUploadFileArgs,
 };
 pub use test_cycles::{TestCycleCommands, TestCycleItemArgs};
-pub use test_plans::{TestPlanCommands, TestPlanItemArgs, TestPlanItemPayloadArgs};
+pub use test_plans::{
+    TestPlanCommands, TestPlanItemArgs, TestPlanItemPayloadArgs, TestPlanLinkTestCaseArgs,
+    TestPlanPatchArgs,
+};
 pub use test_runs::{TestRunCommands, TestRunItemArgs, TestRunItemPayloadArgs};
 pub use util::{ConvertHtmlArgs, UtilCommands};
 pub use values::{ListValuesArgs, SetNumberValueArgs, ValueCommands, ValueItemArgs};

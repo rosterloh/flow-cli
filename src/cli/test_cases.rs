@@ -10,9 +10,9 @@ pub enum TestCaseCommands {
     List(ListArgs),
     Get(TestCaseItemArgs),
     Create(CreateNamedItemsArgs),
-    Patch(PatchCollectionArgs),
+    Patch(TestCasePatchArgs),
     Delete(TestCaseItemArgs),
-    SetSteps(TestCaseItemPayloadArgs),
+    SetSteps(TestCaseSetStepsArgs),
     SetImportId(PatchCollectionArgs),
     UploadFile(TestCaseUploadFileArgs),
     LinkJira(TestCaseItemPayloadArgs),
@@ -46,6 +46,18 @@ pub struct TestCaseItemPayloadArgs {
 }
 
 #[derive(Args, Debug)]
+pub struct TestCaseSetStepsArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long)]
+    pub id: i64,
+    #[arg(long, value_name = "PATH", conflicts_with_all = ["json", "body_file"])]
+    pub steps_file: Option<std::path::PathBuf>,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
+}
+
+#[derive(Args, Debug)]
 pub struct TestCaseUploadFileArgs {
     #[command(flatten)]
     pub context: ResourceContextArgs,
@@ -63,4 +75,20 @@ pub struct TestCaseUnlinkJiraArgs {
     pub id: i64,
     #[arg(long)]
     pub jira_issue_id: String,
+}
+
+#[derive(Args, Debug)]
+pub struct TestCasePatchArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub id: Option<i64>,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub name: Option<String>,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub description: Option<String>,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub owner: Option<String>,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
 }

@@ -8,7 +8,7 @@ use crate::client::HttpSend;
 use crate::config::Config;
 use crate::output::{OutputFormat, print_output};
 
-use super::{list_query, load_json_payload, resolve_context};
+use super::{build_system_link_item, list_query, load_json_payload, resolve_context};
 
 pub async fn handle_systems<C: HttpSend>(
     command: SystemCommands,
@@ -120,7 +120,11 @@ pub async fn handle_systems<C: HttpSend>(
         }
         SystemCommands::LinkDocument(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let body = load_json_payload(&args.payload)?;
+            let body = if let Some(document_id) = args.document_id {
+                build_system_link_item("documentId", json!(document_id))
+            } else {
+                load_json_payload(&args.payload)?
+            };
             let path = format!(
                 "/org/{org}/project/{project}/system/{}/links/documents",
                 args.id
@@ -141,7 +145,11 @@ pub async fn handle_systems<C: HttpSend>(
         }
         SystemCommands::LinkRequirement(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let body = load_json_payload(&args.payload)?;
+            let body = if let Some(requirement_id) = args.requirement_id {
+                build_system_link_item("id", json!(requirement_id))
+            } else {
+                load_json_payload(&args.payload)?
+            };
             let path = format!(
                 "/org/{org}/project/{project}/system/{}/links/requirements",
                 args.id
@@ -171,7 +179,11 @@ pub async fn handle_systems<C: HttpSend>(
         }
         SystemCommands::LinkTestCase(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let body = load_json_payload(&args.payload)?;
+            let body = if let Some(test_case_id) = args.test_case_id {
+                build_system_link_item("testCaseId", json!(test_case_id))
+            } else {
+                load_json_payload(&args.payload)?
+            };
             let path = format!(
                 "/org/{org}/project/{project}/system/{}/links/testCases",
                 args.id
@@ -201,7 +213,11 @@ pub async fn handle_systems<C: HttpSend>(
         }
         SystemCommands::LinkTestPlan(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let body = load_json_payload(&args.payload)?;
+            let body = if let Some(test_plan_id) = args.test_plan_id {
+                build_system_link_item("testPlanId", json!(test_plan_id))
+            } else {
+                load_json_payload(&args.payload)?
+            };
             let path = format!(
                 "/org/{org}/project/{project}/system/{}/links/testPlans",
                 args.id
