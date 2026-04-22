@@ -3,6 +3,7 @@ use serde_json::{Value, json};
 
 use flow_cli::handlers::build_patch_single;
 use flow_cli::handlers::build_links_wrapper;
+use flow_cli::handlers::build_system_link_item;
 
 #[test]
 fn build_patch_single_wraps_id_and_fields_in_array() {
@@ -37,4 +38,16 @@ fn build_links_wrapper_wraps_single_link_in_links_array() {
 fn build_links_wrapper_accepts_empty_links() {
     let body = build_links_wrapper(vec![]);
     assert_eq!(body, json!({ "links": [] }));
+}
+
+#[test]
+fn build_system_link_item_wraps_entity_in_array() {
+    let body = build_system_link_item("testPlanId", json!(203));
+    assert_eq!(body, json!([{ "testPlanId": 203 }]));
+}
+
+#[test]
+fn build_system_link_item_supports_string_ids() {
+    let body = build_system_link_item("documentId", json!("doc-uuid"));
+    assert_eq!(body, json!([{ "documentId": "doc-uuid" }]));
 }

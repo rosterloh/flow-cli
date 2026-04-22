@@ -161,6 +161,15 @@ pub fn build_links_wrapper(links: Vec<Value>) -> Value {
     json!({ "links": links })
 }
 
+/// Build a single-item system-link payload: `[{<entityKey>: <entityValue>}]`.
+/// Used by `systems link-*` commands where the server expects a bare array.
+#[doc(hidden)]
+pub fn build_system_link_item(entity_key: &str, entity_value: Value) -> Value {
+    let mut obj = serde_json::Map::new();
+    obj.insert(entity_key.to_string(), entity_value);
+    Value::Array(vec![Value::Object(obj)])
+}
+
 pub(crate) async fn patch_collection<C, F>(
     client: &C,
     config: &Config,
