@@ -22,17 +22,23 @@ mod test_runs;
 #[path = "integration/values.rs"]
 mod values;
 
-/// Returns `(token, org, project)` from env vars, or `None` if any are absent.
-/// In local dev: call this at the top of every test and `return` early if None.
-/// On CI: the workflow validates credentials before running this binary.
+/// Returns `(org, project)` from env vars when auth credentials are also
+/// present, or `None` otherwise. Auth is satisfied by either `FLOW_ACCESS_TOKEN`
+/// (bearer) or `FLOW_USERNAME` + `FLOW_PASSWORD` (basic) — `FlowClient` picks
+/// whichever is set.
 ///
 /// Example:
 /// ```
-/// let Some((token, org, project)) = require_credentials() else { return };
+/// let Some((org, project)) = require_credentials() else { return };
 /// ```
-pub fn require_credentials() -> Option<(String, String, String)> {
-    let token = std::env::var("FLOW_ACCESS_TOKEN").ok()?;
+pub fn require_credentials() -> Option<(String, String)> {
+    let has_bearer = std::env::var("FLOW_ACCESS_TOKEN").is_ok();
+    let has_basic =
+        std::env::var("FLOW_USERNAME").is_ok() && std::env::var("FLOW_PASSWORD").is_ok();
+    if !has_bearer && !has_basic {
+        return None;
+    }
     let org = std::env::var("FLOW_ORG").ok()?;
     let project = std::env::var("FLOW_PROJECT").ok()?;
-    Some((token, org, project))
+    Some((org, project))
 }

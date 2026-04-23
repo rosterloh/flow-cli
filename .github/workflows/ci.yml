@@ -48,37 +48,21 @@ jobs:
       - name: Verify integration credentials present
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
-          FLOW_REFRESH_TOKEN: ${{ secrets.FLOW_REFRESH_TOKEN }}
+          FLOW_USERNAME: ${{ secrets.FLOW_USERNAME }}
+          FLOW_PASSWORD: ${{ secrets.FLOW_PASSWORD }}
           FLOW_ORG: ${{ secrets.FLOW_ORG }}
           FLOW_PROJECT: ${{ secrets.FLOW_PROJECT }}
         run: |
-          if [ -z "$FLOW_REFRESH_TOKEN" ] || [ -z "$FLOW_ORG" ] || [ -z "$FLOW_PROJECT" ]; then
-            echo "::error::Integration test secrets (FLOW_REFRESH_TOKEN, FLOW_ORG, FLOW_PROJECT) must be configured for CI on main. Add them as repository secrets."
+          if [ -z "$FLOW_USERNAME" ] || [ -z "$FLOW_PASSWORD" ] || [ -z "$FLOW_ORG" ] || [ -z "$FLOW_PROJECT" ]; then
+            echo "::error::Integration test secrets (FLOW_USERNAME, FLOW_PASSWORD, FLOW_ORG, FLOW_PROJECT) must be configured for CI on main. Add them as repository secrets."
             exit 1
           fi
-
-      - name: Exchange refresh token for access token
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        env:
-          FLOW_REFRESH_TOKEN: ${{ secrets.FLOW_REFRESH_TOKEN }}
-          FLOW_BASE_URL: ${{ vars.FLOW_BASE_URL || 'https://api.flowengineering.com/rest/v1' }}
-        run: |
-          payload=$(jq -n --arg t "$FLOW_REFRESH_TOKEN" '{refreshToken: $t}')
-          response=$(curl --fail --silent --show-error \
-            -X POST "${FLOW_BASE_URL%/}/auth/exchange" \
-            -H 'Content-Type: application/json' \
-            --data "$payload")
-          access_token=$(printf '%s' "$response" | jq -r '.accessToken // empty')
-          if [ -z "$access_token" ]; then
-            echo "::error::Exchange response missing accessToken"
-            exit 1
-          fi
-          echo "::add-mask::$access_token"
-          echo "FLOW_ACCESS_TOKEN=$access_token" >> "$GITHUB_ENV"
 
       - name: Integration tests
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
+          FLOW_USERNAME: ${{ secrets.FLOW_USERNAME }}
+          FLOW_PASSWORD: ${{ secrets.FLOW_PASSWORD }}
           FLOW_ORG: ${{ secrets.FLOW_ORG }}
           FLOW_PROJECT: ${{ secrets.FLOW_PROJECT }}
         run: cargo test --test integration

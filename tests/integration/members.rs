@@ -7,19 +7,19 @@ use flow_cli::output::OutputFormat;
 
 use crate::require_credentials;
 
-fn make_config(token: &str, org: &str, _project: &str) -> Config {
-    let mut c = Config::default();
-    c.access_token = Some(token.into());
-    c.org_alias = Some(org.into());
-    c
+fn make_config(org: &str) -> Config {
+    Config {
+        org_alias: Some(org.into()),
+        ..Default::default()
+    }
 }
 
 #[tokio::test]
 async fn members_list_org_returns_without_error() {
-    let Some((token, org, project)) = require_credentials() else {
+    let Some((org, _project)) = require_credentials() else {
         return;
     };
-    let config = make_config(&token, &org, &project);
+    let config = make_config(&org);
     let client = FlowClient::from_config(&config).unwrap();
     handle_members(
         MemberCommands::ListOrg(OrgMemberArgs { org: Some(org) }),
