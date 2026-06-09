@@ -8,7 +8,9 @@ use crate::client::HttpSend;
 use crate::config::Config;
 use crate::output::{OutputFormat, print_output};
 
-use super::{build_links_wrapper, build_patch_single, load_json_payload, resolve_context};
+use super::{
+    build_links_wrapper, build_patch_single, load_json_payload, named_items_body, resolve_context,
+};
 
 pub async fn handle_test_plans<C: HttpSend>(
     command: TestPlanCommands,
@@ -25,7 +27,11 @@ pub async fn handle_test_plans<C: HttpSend>(
         }
         TestPlanCommands::Create(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let body = load_json_payload(&args.payload)?;
+            let body = if let Some(name) = args.name {
+                named_items_body(vec![name], args.description, None)
+            } else {
+                load_json_payload(&args.payload)?
+            };
             let path = format!("/org/{org}/project/{project}/testPlans");
             let response = client
                 .send(Method::POST, &path, &[], Some(body), true)

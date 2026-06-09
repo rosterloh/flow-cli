@@ -39,7 +39,7 @@ pub async fn handle_test_cases<C: HttpSend>(
         }
         TestCaseCommands::Create(args) => {
             let (org, project) = resolve_context(&args.context, config)?;
-            let body = named_items_body(args.names, args.description);
+            let body = named_items_body(args.names, args.description, args.owner);
             let path = format!("/org/{org}/project/{project}/testCases");
             let response = client
                 .send(Method::POST, &path, &[], Some(body), true)

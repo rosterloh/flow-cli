@@ -9,7 +9,7 @@ Most commands accept per-field flags that build the payload for you. Raw-JSON fo
 | Operation | Endpoint command | Flag mode (single item) | Raw payload (batch / custom fields) |
 |---|---|---|---|
 | Create test case | `test-cases create --name ... --description ... [--owner ...]` | flags are native | — |
-| Create test plan | `test-plans create --json '[{"name":"...","description":"..."}]'` | no name/description flags — JSON only | `[{"name":"...","description":"..."}]` (array; response is an array → `id = resp[0]["id"]`) |
+| Create test plan | `test-plans create --name ... --description ...` | flags are native | `[{"name":"...","description":"..."}]` (array; response is an array → `id = resp[0]["id"]`) |
 | Patch test case | `test-cases patch` | `--id N --name ... --description ... --owner ...` | `[{"testCaseId": N, "owner": "..."}]` |
 | Set test-case steps | `test-cases set-steps --id N` | `--steps-file path.json` (file is `[{"action","expected"}]`) | `[{"testCaseId": N, "steps": [{"action","expected"}]}]` |
 | Patch test plan | `test-plans patch` | `--id N --name ... --description ...` | `[{"testPlanId": N, "name": "..."}]` |
@@ -71,10 +71,10 @@ For batch creation, wrap in `try/except` with a rollback that calls `test-cases 
 ## End-to-end: create and populate a test plan
 
 ```python
-# 1. Create — JSON only (no --name flag), response is an array
+# 1. Create — flag mode; response is an array (--json still works for batch)
 pid = json.loads(run([FLOW, "test-plans", "create",
-    "--json", json.dumps([{"name": "Radar x4 Verification",
-                           "description": "..."}])]))[0]["id"]
+    "--name", "Radar x4 Verification",
+    "--description", "..."]))[0]["id"]
 
 # 2. Link each test case (one call per case)
 for tc_id in case_ids:

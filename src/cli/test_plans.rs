@@ -6,7 +6,7 @@ use super::{JsonPayloadArgs, PatchCollectionArgs, ResourceContextArgs};
 #[derive(Subcommand, Debug)]
 pub enum TestPlanCommands {
     List(ResourceContextArgs),
-    Create(PatchCollectionArgs),
+    Create(TestPlanCreateArgs),
     Get(TestPlanItemArgs),
     Patch(TestPlanPatchArgs),
     Delete(TestPlanItemArgs),
@@ -14,6 +14,18 @@ pub enum TestPlanCommands {
     SetImportId(PatchCollectionArgs),
     LinkTestCase(TestPlanLinkTestCaseArgs),
     LinkTestCaseCrossProject(PatchCollectionArgs),
+}
+
+#[derive(Args, Debug)]
+pub struct TestPlanCreateArgs {
+    #[command(flatten)]
+    pub context: ResourceContextArgs,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub name: Option<String>,
+    #[arg(long, conflicts_with_all = ["json", "body_file"])]
+    pub description: Option<String>,
+    #[command(flatten)]
+    pub payload: JsonPayloadArgs,
 }
 
 #[derive(Args, Debug, Clone)]
