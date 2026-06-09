@@ -8,7 +8,8 @@ Most commands accept per-field flags that build the payload for you. Raw-JSON fo
 
 | Operation | Endpoint command | Flag mode (single item) | Raw payload (batch / custom fields) |
 |---|---|---|---|
-| Create test case | `test-cases create --name ... --description ...` | flags are native | — |
+| Create test case | `test-cases create --name ... --description ... [--owner ...]` | flags are native | — |
+| Create test plan | `test-plans create --name ... --description ...` | flags are native | `[{"name":"...","description":"..."}]` (array; response is an array → `id = resp[0]["id"]`) |
 | Patch test case | `test-cases patch` | `--id N --name ... --description ... --owner ...` | `[{"testCaseId": N, "owner": "..."}]` |
 | Set test-case steps | `test-cases set-steps --id N` | `--steps-file path.json` (file is `[{"action","expected"}]`) | `[{"testCaseId": N, "steps": [{"action","expected"}]}]` |
 | Patch test plan | `test-plans patch` | `--id N --name ... --description ...` | `[{"testPlanId": N, "name": "..."}]` |
@@ -28,6 +29,7 @@ Most commands accept per-field flags that build the payload for you. Raw-JSON fo
 - **`set-steps` needs a `caseStepId` UUID per step** — generate with `str(uuid.uuid4())`.
 - **Create responses are arrays**, not objects: `id = json.loads(out)[0]["id"]`.
 - On `400 "doesn't match schema"`, read the error — it names the missing/wrong property. If still stuck, dump the OpenAPI spec (see `api-internals.md`).
+- **Owner must be a project member.** Setting an owner who isn't in the project fails with HTTP **500** `"user 'x' is not in project '<proj>'"` (not a 400). Resolve identities with `flow members list-project` first — a login email (`rio@thehumanoid.ai`) is often not the project identity (`rio@skl.vc`).
 
 ## End-to-end: create, own, step, link a test case
 
@@ -65,6 +67,26 @@ run([FLOW, "requirements", "link-test-case",
 ```
 
 For batch creation, wrap in `try/except` with a rollback that calls `test-cases delete --id N` on each partial creation.
+
+## End-to-end: create and populate a test plan
+
+```python
+# 1. Create — flag mode; response is an array (--json still works for batch)
+pid = json.loads(run([FLOW, "test-plans", "create",
+    "--name", "Radar x4 Verification",
+    "--description", "..."]))[0]["id"]
+
+# 2. Link each test case (one call per case)
+for tc_id in case_ids:
+    run([FLOW, "test-plans", "link-test-case",
+         "--test-plan-id", str(pid), "--test-case-id", str(tc_id)])
+
+# 3. Group under a system in the system tree
+run([FLOW, "systems", "link-test-plan",
+     "--id", system_uuid, "--test-plan-id", str(pid)])
+```
+
+To gather every case verifying a system's requirements, iterate `requirements list-test-cases` over the system's requirement IDs and dedupe by case id — **a requirement often has several test cases**, so the plan's case count exceeds the requirement count. Since `test-plans get` 404s, verify with `systems list-test-plans --id <uuid>` and `test-plans list`.
 
 ## Test plans: two hierarchies, one exposed
 

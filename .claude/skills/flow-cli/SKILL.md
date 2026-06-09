@@ -40,6 +40,7 @@ systems        list (--top-level | --paged --limit --after) | create | update | 
                link-{requirement,test-case,test-plan,document}  (+ unlink-* variants)
 test-cases     create | patch | get | set-steps | list-requirements
 test-plans     list | create | patch | link-test-case        (no get, no delete — see mutations.md)
+members        list-org | add-org | remove-org | list-project | add-project | remove-project
 raw            <get|post|patch|put|delete> <path> [--query K=V] [--json …] [--body-file …]
 ```
 
@@ -55,3 +56,4 @@ Use `$FLOW --output table <cmd>` for humans, plain JSON for scripting. Use `$FLO
 - **Mutations are permanent.** Confirm with the user before `create`, `patch`, `delete`, or any `link-*` / `unlink-*` call. For batches, always have a rollback path.
 - Before a large batch, smoke-test one item end-to-end — the schema validator's error messages are the cheapest way to discover the real payload shape.
 - Mutation payloads are usually arrays even for a single item, and shape rules differ across endpoints — load `references/mutations.md` before writing any mutating call you haven't already verified this session.
+- **Owners must be project members.** A test-case `--owner` (or any owner field) that isn't in the project fails with HTTP **500** (`"user 'x' is not in project"`), not a 400. A user's project identity may differ from their login email (e.g. `rio@skl.vc` vs `rio@thehumanoid.ai`), and the project mixes owner domains — resolve the real identity with `flow members list-project` before assigning.
