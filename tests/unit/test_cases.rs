@@ -7,7 +7,9 @@ use flow_cli::cli::test_cases::{
     TestCaseCommands, TestCaseItemArgs, TestCaseItemPayloadArgs, TestCasePatchArgs,
     TestCaseSetStepsArgs,
 };
-use flow_cli::cli::{JsonPayloadArgs, PatchCollectionArgs, ResourceContextArgs};
+use flow_cli::cli::{
+    CreateNamedItemsArgs, JsonPayloadArgs, PatchCollectionArgs, ResourceContextArgs,
+};
 use flow_cli::config::Config;
 use flow_cli::handlers::handle_test_cases;
 use flow_cli::output::OutputFormat;
@@ -19,6 +21,51 @@ fn ctx(org: &str, project: &str) -> ResourceContextArgs {
         org: Some(org.into()),
         project: Some(project.into()),
     }
+}
+
+#[tokio::test]
+async fn create_with_owner_includes_owner_in_payload() {
+    let mock = MockHttpClient::with_response(json!([{"id": 1}]));
+    handle_test_cases(
+        TestCaseCommands::Create(CreateNamedItemsArgs {
+            context: ctx("o", "p"),
+            names: vec!["Radar Range".into()],
+            description: Some("Verify radar range modes".into()),
+            owner: Some("rio@skl.vc".into()),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(call.method, "POST");
+    assert_eq!(call.path, "/org/o/project/p/testCases");
+    assert_eq!(
+        call.body.as_ref().unwrap(),
+        &json!([{ "name": "Radar Range", "description": "Verify radar range modes", "owner": "rio@skl.vc" }])
+    );
+}
+
+#[tokio::test]
+async fn create_without_owner_omits_owner() {
+    let mock = MockHttpClient::with_response(json!([{"id": 1}]));
+    handle_test_cases(
+        TestCaseCommands::Create(CreateNamedItemsArgs {
+            context: ctx("o", "p"),
+            names: vec!["Plain".into()],
+            description: None,
+            owner: None,
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(call.body.as_ref().unwrap(), &json!([{ "name": "Plain" }]));
 }
 
 #[tokio::test]

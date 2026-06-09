@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Flag-mode shortcuts extended to `create` commands, removing the last
+  hand-crafted JSON payloads from the common create-and-link workflow:
+  - `test-plans create --name ... --description ...` builds the
+    `[{"name","description"}]` payload. `--json` / `--body-file` still work
+    for batch and custom payloads.
+  - `test-cases create --owner ...` (and `requirements create --owner ...`)
+    set the owner inline at creation time, saving a follow-up `patch` call.
+
+### Notes
+
+- Setting an owner who is not a project member fails server-side with HTTP
+  **500** (`"user 'x' is not in project"`), not a validation 400. Resolve
+  identities with `flow members list-project` first — a login email is often
+  not the project identity.
+
 ## [1.0.1] - 2026-04-22
 
 ### Added

@@ -5,7 +5,7 @@ Notes captured from a session of heavy live use (2026-04-22). The two highest-im
 ## In flight
 
 - **#1 Payload-shape normalization.** Hide server-side inconsistency (bare arrays vs `{links: [...]}` wrappers vs `--id` + nested id) behind a consistent CLI surface.
-- **#5 Single-item flag shorthands.** `test-cases patch --id N --owner X --description Y` instead of hand-crafting `[{"testCaseId": N, ...}]` JSON.
+- **#5 Single-item flag shorthands.** `test-cases patch --id N --owner X --description Y` instead of hand-crafting `[{"testCaseId": N, ...}]` JSON. _Extended to create commands: `test-plans create --name/--description` and `test-cases create --owner` (also `requirements create --owner`)._
 
 ## Not yet scheduled
 

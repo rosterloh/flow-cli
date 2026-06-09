@@ -122,7 +122,11 @@ pub(crate) fn redact(value: &str) -> String {
     }
 }
 
-pub(crate) fn named_items_body(names: Vec<String>, description: Option<String>) -> Value {
+pub(crate) fn named_items_body(
+    names: Vec<String>,
+    description: Option<String>,
+    owner: Option<String>,
+) -> Value {
     Value::Array(
         names
             .into_iter()
@@ -130,6 +134,9 @@ pub(crate) fn named_items_body(names: Vec<String>, description: Option<String>) 
                 let mut item = json!({ "name": name });
                 if let Some(description) = &description {
                     item["description"] = Value::String(description.clone());
+                }
+                if let Some(owner) = &owner {
+                    item["owner"] = Value::String(owner.clone());
                 }
                 item
             })

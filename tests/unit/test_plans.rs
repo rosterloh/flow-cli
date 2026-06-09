@@ -2,10 +2,10 @@
 use serde_json::json;
 
 use flow_cli::cli::test_plans::{
-    TestPlanCommands, TestPlanItemArgs, TestPlanItemPayloadArgs, TestPlanLinkTestCaseArgs,
-    TestPlanPatchArgs,
+    TestPlanCommands, TestPlanCreateArgs, TestPlanItemArgs, TestPlanItemPayloadArgs,
+    TestPlanLinkTestCaseArgs, TestPlanPatchArgs,
 };
-use flow_cli::cli::{JsonPayloadArgs, PatchCollectionArgs, ResourceContextArgs};
+use flow_cli::cli::{JsonPayloadArgs, ResourceContextArgs};
 use flow_cli::config::Config;
 use flow_cli::handlers::handle_test_plans;
 use flow_cli::output::OutputFormat;
@@ -23,10 +23,12 @@ fn ctx(org: &str, project: &str) -> ResourceContextArgs {
 async fn create_calls_post_on_test_plans_path() {
     let mock = MockHttpClient::with_response(json!({"id": 1}));
     handle_test_plans(
-        TestPlanCommands::Create(PatchCollectionArgs {
+        TestPlanCommands::Create(TestPlanCreateArgs {
             context: ctx("o", "p"),
+            name: None,
+            description: None,
             payload: JsonPayloadArgs {
-                json: Some("{}".into()),
+                json: Some("[{}]".into()),
                 body_file: None,
             },
         }),
@@ -39,6 +41,54 @@ async fn create_calls_post_on_test_plans_path() {
     let call = &mock.calls()[0];
     assert_eq!(call.method, "POST");
     assert_eq!(call.path, "/org/o/project/p/testPlans");
+}
+
+#[tokio::test]
+async fn create_flag_mode_builds_named_item_array() {
+    let mock = MockHttpClient::with_response(json!([{"id": 1}]));
+    handle_test_plans(
+        TestPlanCommands::Create(TestPlanCreateArgs {
+            context: ctx("o", "p"),
+            name: Some("Radar x4 Verification".into()),
+            description: Some("Covers all Radar x4 requirements".into()),
+            payload: JsonPayloadArgs::default(),
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(call.method, "POST");
+    assert_eq!(call.path, "/org/o/project/p/testPlans");
+    assert_eq!(
+        call.body.as_ref().unwrap(),
+        &json!([{ "name": "Radar x4 Verification", "description": "Covers all Radar x4 requirements" }])
+    );
+}
+
+#[tokio::test]
+async fn create_json_mode_still_works() {
+    let mock = MockHttpClient::with_response(json!([{"id": 1}]));
+    handle_test_plans(
+        TestPlanCommands::Create(TestPlanCreateArgs {
+            context: ctx("o", "p"),
+            name: None,
+            description: None,
+            payload: JsonPayloadArgs {
+                json: Some(r#"[{"name":"raw"}]"#.into()),
+                body_file: None,
+            },
+        }),
+        &mock,
+        &Config::default(),
+        OutputFormat::Json,
+    )
+    .await
+    .unwrap();
+    let call = &mock.calls()[0];
+    assert_eq!(call.body.as_ref().unwrap(), &json!([{ "name": "raw" }]));
 }
 
 #[tokio::test]
